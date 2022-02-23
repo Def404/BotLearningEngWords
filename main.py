@@ -1,27 +1,50 @@
 import telebot
 
 import config
+import database
 
 bot = telebot.TeleBot(config.token)
+database.created_db()
 
 
 @bot.message_handler(commands=["start"])
-def start(m, res=False):
-    bot.send_message(m.chat.id, 'Я на связи. Напиши мне что-нибудь )')
-
-
-@bot.message_handler(commands=["test"])
-def start(m, res=False):
-    bot.send_message(m.chat.id, 'test')
+def start(message):
+    bot.send_message(message.chat.id, 'Привет, ' + message.chat.username + '! Начни изучать слова!')
 
 
 @bot.message_handler(commands=["add"])
-def start(m, res=False):
-    bot.send_message(m.chat.id, 'add')
+def start(message):
+    message_args = message.text.split(' ')
+    if len(message_args) == 1:
+        bot.send_message(message.chat.id, 'Введите слово которое хотите добавить')
+    else:
+        text_message = message.text.split(' ')[1]
+        bot.send_message(message.chat.id, text_message)
 
 
-def print_hi(name):
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+@bot.message_handler(commands=["dictionary"])
+def start(message):
+    bot.send_message(message.chat.id, 'Ваш словарь:')
+
+
+@bot.message_handler(commands=["new"])
+def start(message):
+    bot.send_message(message.chat.id, 'Какое-то новое слово')
+
+
+@bot.message_handler(commands=["test"])
+def start(message):
+    bot.send_message(message.chat.id, 'Test')
+
+
+@bot.message_handler(commands=["translate"])
+def start(message):
+    message_args = message.text.split(' ')
+    if len(message_args) == 1:
+        bot.send_message(message.chat.id, 'Введите слово которое хотите перевести')
+    else:
+        text_message = message.text.split(' ')[1]
+        bot.send_message(message.chat.id, text_message)
 
 
 bot.polling(none_stop=True, interval=0)
