@@ -26,8 +26,14 @@ def start(message):
 
 @bot.message_handler(commands=["dictionary"])
 def start(message):
-    bot.send_message(message.chat.id, 'Ваш словарь:')
-    command.get_dictionary(message.chat.id)
+    #bot.send_message(message.chat.id, 'Ваш словарь:')
+    dictionary_list = command.get_dictionary(message.chat.id)
+    message_res = 'Ваш словарь: \n\n'
+    message_res += '№. слово - перевод | процет ответов\n'
+    for word in dictionary_list:
+        message_res += str(word[0]) + '. ' + word[1] + ' - ' + word[2] + ' | ' + str(word[3]) + '%\n'
+
+    bot.send_message(message.chat.id, message_res)
 
 
 @bot.message_handler(commands=["new"])
