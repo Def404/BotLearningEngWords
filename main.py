@@ -2,9 +2,10 @@ import telebot
 
 import config
 import database
+import command.add_cmd
 
 bot = telebot.TeleBot(config.token)
-database.created_db()
+print('Start bot')
 
 
 @bot.message_handler(commands=["start"])
@@ -20,11 +21,13 @@ def start(message):
     else:
         text_message = message.text.split(' ')[1]
         bot.send_message(message.chat.id, text_message)
+        command.add_cmd.add_word(message.chat.id, text_message)
 
 
 @bot.message_handler(commands=["dictionary"])
 def start(message):
     bot.send_message(message.chat.id, 'Ваш словарь:')
+    database.select_dictionary_db()
 
 
 @bot.message_handler(commands=["new"])
