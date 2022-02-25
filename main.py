@@ -2,7 +2,7 @@ import telebot
 
 import config
 import database
-import command.add_cmd
+import command
 
 bot = telebot.TeleBot(config.token)
 print('Start bot')
@@ -19,15 +19,15 @@ def start(message):
     if len(message_args) == 1:
         bot.send_message(message.chat.id, 'Введите слово которое хотите добавить')
     else:
-        text_message = message.text.split(' ')[1]
-        bot.send_message(message.chat.id, text_message)
-        command.add_cmd.add_word(message.chat.id, text_message)
+        text_message = message.text.split(' ')[1].lower()
+        add_result = command.add_word(message.chat.id, text_message)
+        bot.send_message(message.chat.id, add_result)
 
 
 @bot.message_handler(commands=["dictionary"])
 def start(message):
     bot.send_message(message.chat.id, 'Ваш словарь:')
-    database.select_dictionary_db()
+    command.get_dictionary(message.chat.id)
 
 
 @bot.message_handler(commands=["new"])
