@@ -62,3 +62,19 @@ def check_repeat_word(user_id, word):
     finally:
         if sqlite_connection:
             sqlite_connection.close()
+
+
+def delete_word(user_id, word):
+    try:
+        sqlite_connection = sqlite3.connect('tg_database.db')
+        cursor = sqlite_connection.cursor()
+
+        cursor.execute("DELETE FROM dictionary WHERE Uid=(?) AND Word=(?)", (user_id, word))
+        sqlite_connection.commit()
+
+    except sqlite3.Error as error:
+        print(error.args)
+
+    finally:
+        if sqlite_connection:
+            sqlite_connection.close()

@@ -5,6 +5,8 @@ import database
 import command
 import function
 
+from telebot import types
+
 bot = telebot.TeleBot(config.token)
 print('Start bot')
 
@@ -48,7 +50,7 @@ def start(message):
             response_message = 'Слова не были добавлены\n\n' + error_mes
 
         else:
-            response_message = 'В словарь были добавлены слова, кроме\n\n'  + error_mes
+            response_message = 'В словарь были добавлены слова, кроме\n\n' + error_mes
 
         bot.send_message(message.chat.id, response_message)
 
@@ -70,7 +72,34 @@ def start(message):
     if len(message_args) == 1:
         bot.send_message(message.chat.id, 'Введите слово которое хотите удалить')
     else:
-        bot.send_message(message.chat.id, 'sd')
+        word = message_args[1]
+        if database.check_repeat_word(message.chat.id, word)[0][0] > 0:
+            keyboard = types.InlineKeyboardMarkup()
+
+            del_button = types.InlineKeyboardButton(text='Удалить', callback_data=word)
+            keyboard.add(del_button)
+
+            cancel_button = types.InlineKeyboardButton(text='Отмена', callback_data='cancel')
+            keyboard.add(cancel_button)
+
+            bot.send_message(message.chat.id, 'Вы точно хотите удалить слово ' + word + '?', reply_markup=keyboard)
+        else:
+            bot.send_message(message.chat.id, 'Слово не найдено')
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_worker(call):
+
+    if call.data == 'cancel':
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+    else:
+        word = call.data
+        chat_id = call.message.chat.id
+
+        database.delete_word(chat_id, word)
+
+        bot.delete_message(chat_id, call.message.message_id)
+        bot.send_message(chat_id, 'Слово ' + word + ' удалено из словаря')
 
 
 @bot.message_handler(commands=["new"])
@@ -96,7 +125,7 @@ def start(message):
             response_message = 'Перевод\n\n' + word + ' - ' + function.translate_word(word, 'En', 'Russian')
             bot.send_message(message.chat.id, response_message)
         else:
-            response_message = "Перевод не возможен \n\n• Проверьте написание слова\n• Перевод доступен с английского "\
+            response_message = "Перевод не возможен \n\n• Проверьте написание слова\n• Перевод доступен с английского " \
                                "на русский "
             bot.send_message(message.chat.id, response_message)
 

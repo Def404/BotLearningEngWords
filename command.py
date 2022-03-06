@@ -2,8 +2,6 @@ import database
 import enchant
 from translate import Translator
 
-import function
-
 
 def get_dictionary(user_id):
     dictionary_list = database.select_dictionary_db(user_id)
