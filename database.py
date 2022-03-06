@@ -49,7 +49,7 @@ def insert_dictionary_db(user_id, word):
             sqlite_connection.close()
 
 
-def find_repid_word(user_id, word):
+def check_repeat_word(user_id, word):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
