@@ -88,9 +88,17 @@ def start(message):
     message_args = message.text.split(' ')
     if len(message_args) == 1:
         bot.send_message(message.chat.id, 'Введите слово которое хотите перевести')
+    elif len(message_args) > 2:
+        bot.send_message(message.chat.id, 'Можно перевести только одно слово')
     else:
-        text_message = message.text.split(' ')[1]
-        bot.send_message(message.chat.id, command.translate_word(text_message))
+        word = message.text.split(' ')[1]
+        if function.check_spelling(word):
+            response_message = 'Перевод\n\n' + word + ' - ' + function.translate_word(word, 'En', 'Russian')
+            bot.send_message(message.chat.id, response_message)
+        else:
+            response_message = "Перевод не возможен \n\n• Проверьте написание слова\n• Перевод доступен с английского "\
+                               "на русский "
+            bot.send_message(message.chat.id, response_message)
 
 
 bot.polling(none_stop=True, interval=0)

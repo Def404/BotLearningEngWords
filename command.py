@@ -2,6 +2,8 @@ import database
 import enchant
 from translate import Translator
 
+import function
+
 
 def get_dictionary(user_id):
     dictionary_list = database.select_dictionary_db(user_id)
@@ -20,16 +22,5 @@ def get_dictionary(user_id):
         dictionary_list_res.append(word_list)
 
     return dictionary_list_res
-
-
-def translate_word(word):
-    dictionary = enchant.Dict('en_US')
-    dictionary_check = dictionary.check(word)
-    if dictionary_check:
-        translator = Translator(to_lang='Russian')
-        word_translate = translator.translate(word)
-        return word_translate
-    else:
-        return "Перевод не возможен \n\n• Проверьте написание слова\n• Перевод доступен с английского на русский"
 
 
