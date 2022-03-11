@@ -1,5 +1,4 @@
 import enchant
-from translate import Translator
 from googletrans import Translator
 
 
@@ -14,12 +13,6 @@ def check_spelling_ru(word):
     dictionary = enchant.Dict('ru_Ru')
     result = dictionary.check(word)
     return result
-
-
-def translate_word(word, from_lang, to_lang):
-    translator = Translator(to_lang=to_lang)
-    word_translate = translator.translate(word)
-    return word_translate
 
 
 def google_translate_word(word):
