@@ -34,7 +34,7 @@ def start(message):
             word.lower()
 
             # checking for error
-            if not function.check_spelling(word):
+            if not function.check_spelling_en(word):
                 error_word.append(word + ' - слово написано с ошибкой')
             else:
                 if database.check_repeat_word(message.chat.id, word)[0][0] > 0:
@@ -109,6 +109,7 @@ def start(message):
 
 @bot.message_handler(commands=["test"])
 def start(message):
+    function.google_translate_word()
     bot.send_message(message.chat.id, 'Test')
 
 
@@ -121,12 +122,12 @@ def start(message):
         bot.send_message(message.chat.id, 'Можно перевести только одно слово')
     else:
         word = message.text.split(' ')[1]
-        if function.check_spelling(word):
-            response_message = 'Перевод\n\n' + word + ' - ' + function.translate_word(word, 'En', 'Russian')
+        if function.check_spelling_en(word) or function.check_spelling_ru(word):
+            response_message = 'Перевод\n\n' + word + ' - ' + function.google_translate_word(word)
             bot.send_message(message.chat.id, response_message)
         else:
             response_message = "Перевод не возможен \n\n• Проверьте написание слова\n• Перевод доступен с английского " \
-                               "на русский "
+                               "и русского"
             bot.send_message(message.chat.id, response_message)
 
 
