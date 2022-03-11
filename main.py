@@ -1,5 +1,4 @@
 import telebot
-
 import config
 import database
 import command
@@ -92,6 +91,24 @@ def callback_worker(call):
 
     if call.data == 'cancel':
         bot.delete_message(call.message.chat.id, call.message.message_id)
+    elif call.data == 'accept_btn':
+        print('add')
+    elif call.data == 'change_btn':
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+
+        word = function.get_random_word(call.message.chat.id)
+        word_translate = function.google_translate_word(word)
+
+        keyboard = types.InlineKeyboardMarkup()
+
+        accept_btn = types.InlineKeyboardButton(text='Добавить', callback_data='accept_btn')
+        keyboard.add(accept_btn)
+
+        change_btn = types.InlineKeyboardButton(text='Поменять', callback_data='change_btn')
+        keyboard.add(change_btn)
+
+        bot.send_message(call.message.chat.id, word + ' - ' + word_translate, reply_markup=keyboard)
+
     else:
         word = call.data
         chat_id = call.message.chat.id
@@ -104,7 +121,18 @@ def callback_worker(call):
 
 @bot.message_handler(commands=["new"])
 def start(message):
-    bot.send_message(message.chat.id, 'Какое-то новое слово')
+    word = function.get_random_word(message.chat.id)
+    word_translate = function.google_translate_word(word)
+
+    keyboard = types.InlineKeyboardMarkup()
+
+    accept_btn = types.InlineKeyboardButton(text='Добавить', callback_data='accept_btn')
+    keyboard.add(accept_btn)
+
+    change_btn = types.InlineKeyboardButton(text='Поменять', callback_data='change_btn')
+    keyboard.add(change_btn)
+
+    bot.send_message(message.chat.id, word + ' - ' + word_translate, reply_markup=keyboard)
 
 
 @bot.message_handler(commands=["test"])
