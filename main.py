@@ -6,6 +6,7 @@ import function
 
 from telebot import types
 
+
 bot = telebot.TeleBot(config.token)
 print('Start bot')
 
@@ -39,7 +40,8 @@ def start(message):
                 if database.check_repeat_word(message.chat.id, word)[0][0] > 0:
                     error_word.append(word + ' - слово уже есть в словаре')
                 else:
-                    database.insert_dictionary_db(message.chat.id, word)
+                    word_translate = function.google_translate_word(word).lower()
+                    database.insert_dictionary_db(message.chat.id, word, word_translate)
 
         error_mes = ''
         for word in error_word:
@@ -92,12 +94,23 @@ def callback_worker(call):
     if call.data == 'cancel':
         bot.delete_message(call.message.chat.id, call.message.message_id)
     elif call.data == 'accept_btn':
-        print('add')
+        text = call.message.text
+        text_list = text.split(' - ')
+
+        word = text_list[0]
+        word_translate = text_list[1]
+
+        database.insert_dictionary_db(call.message.chat.id, word, word_translate)
+
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+
+        bot.send_message(call.message.chat.id, "Слово " + word + " - " + word_translate + "\nбыло добавлено в словарь")
+
     elif call.data == 'change_btn':
         bot.delete_message(call.message.chat.id, call.message.message_id)
 
         word = function.get_random_word(call.message.chat.id)
-        word_translate = function.google_translate_word(word)
+        word_translate = function.google_translate_word(word).lower()
 
         keyboard = types.InlineKeyboardMarkup()
 
@@ -122,7 +135,7 @@ def callback_worker(call):
 @bot.message_handler(commands=["new"])
 def start(message):
     word = function.get_random_word(message.chat.id)
-    word_translate = function.google_translate_word(word)
+    word_translate = function.google_translate_word(word).lower()
 
     keyboard = types.InlineKeyboardMarkup()
 
@@ -137,7 +150,6 @@ def start(message):
 
 @bot.message_handler(commands=["test"])
 def start(message):
-    function.google_translate_word()
     bot.send_message(message.chat.id, 'Test')
 
 

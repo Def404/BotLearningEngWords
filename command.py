@@ -1,5 +1,4 @@
 import database
-from googletrans import Translator
 
 
 def get_dictionary(user_id):
@@ -12,13 +11,12 @@ def get_dictionary(user_id):
 
         count += 1
 
-        translator = Translator()
-        word_translate = translator.translate(element[2], dest='ru').text.lower()
-
         result_tests = 0
+
         if element[3] != 0:
             result_tests = element[4] // element[3] * 100
-        word_list = [count, element[2], word_translate, result_tests]
+
+        word_list = [count, element[2], element[5], result_tests]
 
         dictionary_list_res.append(word_list)
 

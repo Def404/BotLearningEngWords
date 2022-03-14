@@ -1,7 +1,7 @@
 import enchant
 
 from googletrans import Translator
-from random_word import RandomWords
+import random
 
 
 # function for checking spelling english words
@@ -39,14 +39,18 @@ def google_translate_word(word):
 
 
 def get_random_word(user_id):
-    r = RandomWords()
-    random_word = r.get_random_word(hasDictionaryDef="true", includePartOfSpeech="noun,verb", minCorpusCount=1, maxCorpusCount=10, minDictionaryCount=1, maxDictionaryCount=10)
-    print(str(check_spelling_en(random_word)) + ' ' + random_word)
-    while not check_spelling_en(random_word):
-        print(str(check_spelling_en(random_word)) + ' ' + random_word)
-        random_word = r.get_random_word(hasDictionaryDef="true", includePartOfSpeech="noun,verb", minCorpusCount=1, maxCorpusCount=10, minDictionaryCount=1, maxDictionaryCount=10)
 
-    while database.check_repeat_word(user_id, random_word)[0][0] > 0:
-        random_word = r.get_random_word(hasDictionaryDef="true", includePartOfSpeech="noun,verb", minCorpusCount=1, maxCorpusCount=10, minDictionaryCount=1, maxDictionaryCount=10)
+    words = database.get_words()
 
-    return random_word
+    rnd = random.randint(0, len(words))
+    rnd_word = words[rnd][0]
+
+    while not check_spelling_en(rnd_word):
+        rnd = random.randint(0, len(words))
+        rnd_word = words[rnd][0]
+
+    while database.check_repeat_word(user_id, rnd_word)[0][0] > 0:
+        rnd = random.randint(0, len(words))
+        rnd_word = words[rnd][0]
+
+    return rnd_word
