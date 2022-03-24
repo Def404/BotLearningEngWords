@@ -52,10 +52,13 @@ def start(message):
             error_mes += '• ' + word + '\n'
 
         if len(error_word) == len(words):
-            response_message = '*Слова не были добавлены*\n\n' + error_mes
+            response_message = '*Слово(-а) не было(-и) добавлено(-ы)*\n\n' + error_mes
+
+        elif len(error_word) > 0:
+            response_message = '*В словарь были добавлены слова, кроме*\n\n' + error_mes
 
         else:
-            response_message = '*В словарь были добавлены слова, кроме*\n\n' + error_mes
+            response_message = '*Cлово(-а) было(-и) добавлено(-ы)*'
 
         bot.send_message(message.chat.id, response_message, parse_mode="Markdown")
 
@@ -85,16 +88,33 @@ def start(message):
         if database.check_repeat_word(message.chat.id, word)[0][0] > 0:
             keyboard = types.InlineKeyboardMarkup()
 
-            del_button = types.InlineKeyboardButton(text='Удалить', callback_data=word)
-            keyboard.add(del_button)
+            del_word_btn = types.InlineKeyboardButton(text='Удалить', callback_data=word)
+            keyboard.add(del_word_btn)
 
-            cancel_button = types.InlineKeyboardButton(text='Отмена', callback_data='cancel')
-            keyboard.add(cancel_button)
+            cnl_word_btn = types.InlineKeyboardButton(text='Отмена', callback_data='cnl_word_btn')
+            keyboard.add(cnl_word_btn)
 
             bot.send_message(message.chat.id, 'Вы точно хотите удалить слово "*' + word + '*"?', reply_markup=keyboard,
                              parse_mode="Markdown")
         else:
             bot.send_message(message.chat.id, 'Слово "*' + word + '*" не найдено', parse_mode="Markdown")
+
+
+@bot.message_handler(commands=["deldictionary"])
+def start(message):
+
+    keyboard = types.InlineKeyboardMarkup()
+
+    cnl_del_dict_btn = types.InlineKeyboardButton(text='Отмена', callback_data='cnl_del_dict_btn')
+    keyboard.add(cnl_del_dict_btn)
+
+    del_dict_btn = types.InlineKeyboardButton(text='Удалить', callback_data='del_dict_btn')
+    keyboard.add(del_dict_btn)
+
+    bot.send_message(message.chat.id, 'Вы уверены, что хотите очистить  словарь?\n'
+                                      '*Вернуть словарь будет не возможно*',
+                     reply_markup=keyboard,
+                     parse_mode="Markdown")
 
 
 def created_btn_new_cmd(message):
@@ -103,11 +123,11 @@ def created_btn_new_cmd(message):
 
     keyboard = types.InlineKeyboardMarkup()
 
-    accept_btn = types.InlineKeyboardButton(text='Добавить', callback_data='accept_btn')
-    keyboard.add(accept_btn)
+    accept_word_btn = types.InlineKeyboardButton(text='Добавить', callback_data='accept_word_btn')
+    keyboard.add(accept_word_btn)
 
-    change_btn = types.InlineKeyboardButton(text='Поменять', callback_data='change_btn')
-    keyboard.add(change_btn)
+    change_word_btn = types.InlineKeyboardButton(text='Поменять', callback_data='change_word_btn')
+    keyboard.add(change_word_btn)
 
     bot.send_message(message.chat.id, '*' + word + '* - _' + word_translate + '_', reply_markup=keyboard,
                      parse_mode="Markdown")
@@ -117,12 +137,12 @@ def created_btn_new_cmd(message):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
 
-    if call.data == 'cancel':
+    if call.data == 'cnl_word_btn':
 
         # Обработчик кнопки отмена команды /delword
         bot.delete_message(call.message.chat.id, call.message.message_id)
 
-    elif call.data == 'accept_btn':
+    elif call.data == 'accept_word_btn':
 
         # Обработчик кнопки принять команды /new
         text = call.message.text
@@ -138,11 +158,19 @@ def callback_worker(call):
         bot.send_message(call.message.chat.id, 'Слово "*' + word + '* - _' + word_translate +
                          '_" было добавлено в словарь', parse_mode="Markdown")
 
-    elif call.data == 'change_btn':
+    elif call.data == 'change_word_btn':
 
         # Обработчик книпки смены слова /new
         bot.delete_message(call.message.chat.id, call.message.message_id)
         created_btn_new_cmd(call.message)
+
+    elif call.data == 'cnl_del_dict_btn':
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+
+    elif call.data == 'del_dict_btn':
+        database.del_dict_user(call.message.chat.id)
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        bot.send_message(call.message.chat.id, 'Словарь был очищен')
 
     else:
 

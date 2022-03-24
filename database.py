@@ -35,7 +35,6 @@ def select_dictionary_db(user_id):
 
 def insert_dictionary_db(user_id, word, word_translate):
 
-
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
@@ -95,6 +94,22 @@ def get_words():
         print(error.args)
         s = []
         return s
+
+    finally:
+        if sqlite_connection:
+            sqlite_connection.close()
+
+
+def del_dict_user(user_id):
+    try:
+        sqlite_connection = sqlite3.connect('tg_database.db')
+        cursor = sqlite_connection.cursor()
+
+        cursor.execute("DELETE FROM dictionary WHERE Uid=(?)", (user_id,))
+        sqlite_connection.commit()
+
+    except sqlite3.Error as error:
+        print(error.args)
 
     finally:
         if sqlite_connection:
