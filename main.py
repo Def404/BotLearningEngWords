@@ -3,6 +3,7 @@ import config
 import database
 import command
 import function
+import re
 
 from telebot import types
 
@@ -14,7 +15,7 @@ print('Start bot')
 # Команда старта
 @bot.message_handler(commands=["start"])
 def start(message):
-    bot.send_message(message.chat.id, 'Привет, ' + message.chat.username + '! Начни изучать слова!')
+    bot.send_message(message.chat.id, 'Привет, ' + str(message.chat.first_name) + '! Начни изучать слова!')
 
 
 # Команда добавления в словарь слова от пользователя
@@ -36,9 +37,10 @@ def start(message):
 
         for word in words:
             word.lower()
+            word = re.sub("[.|.|?]", "", word)
 
             # checking for error
-            if not function.check_spelling_en(word):
+            if not function.check_spelling_en(word) or re.sub("[0-9]", "", word) == "" or len(word) < 2:
                 error_word.append('_' + word + '_' + ' - слово написано с ошибкой')
             else:
                 if database.check_repeat_word(message.chat.id, word)[0][0] > 0:
@@ -91,8 +93,8 @@ def start(message):
             del_word_btn = types.InlineKeyboardButton(text='Удалить', callback_data=word)
             keyboard.add(del_word_btn)
 
-            cnl_word_btn = types.InlineKeyboardButton(text='Отмена', callback_data='cnl_word_btn')
-            keyboard.add(cnl_word_btn)
+            cnl_del_word_btn = types.InlineKeyboardButton(text='Отмена', callback_data='cnl_del_word_btn')
+            keyboard.add(cnl_del_word_btn)
 
             bot.send_message(message.chat.id, 'Вы точно хотите удалить слово "*' + word + '*"?', reply_markup=keyboard,
                              parse_mode="Markdown")
@@ -117,7 +119,7 @@ def start(message):
                      parse_mode="Markdown")
 
 
-def created_btn_new_cmd(message):
+def created_btn_new_cmd(message, message_id):
     word = function.get_random_word(message.chat.id)
     word_translate = function.google_translate_word(word).lower()
 
@@ -126,8 +128,11 @@ def created_btn_new_cmd(message):
     accept_word_btn = types.InlineKeyboardButton(text='Добавить', callback_data='accept_word_btn')
     keyboard.add(accept_word_btn)
 
-    change_word_btn = types.InlineKeyboardButton(text='Поменять', callback_data='change_word_btn')
+    change_word_btn = types.InlineKeyboardButton(text='Поменять', callback_data='change_word_btn ' + str(message_id))
     keyboard.add(change_word_btn)
+
+    cancel_word_btn = types.InlineKeyboardButton(text='Отменить', callback_data='cancel_word_btn ' + str(message_id))
+    keyboard.add(cancel_word_btn)
 
     bot.send_message(message.chat.id, '*' + word + '* - _' + word_translate + '_', reply_markup=keyboard,
                      parse_mode="Markdown")
@@ -137,10 +142,11 @@ def created_btn_new_cmd(message):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
 
-    if call.data == 'cnl_word_btn':
+    if call.data == 'cnl_del_word_btn':
 
         # Обработчик кнопки отмена команды /delword
         bot.delete_message(call.message.chat.id, call.message.message_id)
+        bot.delete_message(call.message.chat.id, call.message.message_id - 1)
 
     elif call.data == 'accept_word_btn':
 
@@ -151,6 +157,9 @@ def callback_worker(call):
         word = text_list[0]
         word_translate = text_list[1]
 
+        if database.check_repeat_word(call.message.chat.id, word)[0][0] > 0:
+            return
+
         database.insert_dictionary_db(call.message.chat.id, word, word_translate)
 
         bot.delete_message(call.message.chat.id, call.message.message_id)
@@ -158,14 +167,19 @@ def callback_worker(call):
         bot.send_message(call.message.chat.id, 'Слово "*' + word + '* - _' + word_translate +
                          '_" было добавлено в словарь', parse_mode="Markdown")
 
-    elif call.data == 'change_word_btn':
+    elif call.data.split(' ')[0] == 'change_word_btn':
 
         # Обработчик книпки смены слова /new
         bot.delete_message(call.message.chat.id, call.message.message_id)
-        created_btn_new_cmd(call.message)
+        created_btn_new_cmd(call.message, call.data.split(' ')[1])
+
+    elif call.data.split(' ')[0] == 'cancel_word_btn':
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        bot.delete_message(call.message.chat.id, call.data.split(' ')[1])
 
     elif call.data == 'cnl_del_dict_btn':
         bot.delete_message(call.message.chat.id, call.message.message_id)
+        bot.delete_message(call.message.chat.id, call.message.message_id -1)
 
     elif call.data == 'del_dict_btn':
         database.del_dict_user(call.message.chat.id)
@@ -187,7 +201,7 @@ def callback_worker(call):
 # Команда генерации нового слова для изучения
 @bot.message_handler(commands=["new"])
 def start(message):
-    created_btn_new_cmd(message)
+    created_btn_new_cmd(message, message.message_id)
 
 
 # Команда составления теста
