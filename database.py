@@ -20,7 +20,7 @@ def select_dictionary_db(user_id):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
-        cursor.execute("SELECT * FROM dictionary WHERE Uid=:user_id", {"user_id": user_id})
+        cursor.execute("SELECT * FROM user_dictionary WHERE Uid=:user_id", {"user_id": user_id})
         return cursor.fetchall()
 
     except sqlite3.Error as error:
@@ -39,7 +39,7 @@ def insert_dictionary_db(user_id, word, word_translate):
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
 
-        cursor.execute("INSERT INTO dictionary (Uid, Word, TranslateWord,Asked, Answered) VALUES (?,?,?,0,0)",
+        cursor.execute("INSERT INTO user_dictionary (Uid, Word, TranslateWord,Asked, Answered) VALUES (?,?,?,0,0)",
                        (user_id, word, word_translate))
 
         sqlite_connection.commit()
@@ -56,7 +56,7 @@ def check_repeat_word(user_id, word):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
-        cursor.execute("SELECT COUNT() FROM dictionary WHERE Uid=(?) AND Word=(?)", (user_id, word))
+        cursor.execute("SELECT COUNT() FROM user_dictionary WHERE Uid=(?) AND Word=(?)", (user_id, word))
         return cursor.fetchall()
 
     except sqlite3.Error as error:
@@ -72,7 +72,7 @@ def delete_word(user_id, word):
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
 
-        cursor.execute("DELETE FROM dictionary WHERE Uid=(?) AND Word=(?)", (user_id, word))
+        cursor.execute("DELETE FROM user_dictionary WHERE Uid=(?) AND Word=(?)", (user_id, word))
         sqlite_connection.commit()
 
     except sqlite3.Error as error:
@@ -87,7 +87,7 @@ def get_words():
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
-        cursor.execute("SELECT word FROM eng_words")
+        cursor.execute("SELECT word FROM eng_words_dictionary")
         return cursor.fetchall()
 
     except sqlite3.Error as error:
@@ -105,7 +105,7 @@ def del_dict_user(user_id):
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
 
-        cursor.execute("DELETE FROM dictionary WHERE Uid=(?)", (user_id,))
+        cursor.execute("DELETE FROM user_dictionary WHERE Uid=(?)", (user_id,))
         sqlite_connection.commit()
 
     except sqlite3.Error as error:

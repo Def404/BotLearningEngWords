@@ -38,15 +38,17 @@ def start(message):
         for word in words:
             word.lower()
             word = re.sub("[.|.|?]", "", word)
-
+            word_translate = function.google_translate_word(word).lower()
             # checking for error
-            if not function.check_spelling_en(word) or re.sub("[0-9]", "", word) == "" or len(word) < 2:
+            if not function.check_spelling_en(word) or \
+                    re.sub("[0-9]", "", word) == "" or \
+                    len(word) < 2 or \
+                    len(word_translate) <= 0:
                 error_word.append('_' + word + '_' + ' - слово написано с ошибкой')
             else:
                 if database.check_repeat_word(message.chat.id, word)[0][0] > 0:
                     error_word.append('_' + word + '_' + ' - слово уже есть в словаре')
                 else:
-                    word_translate = function.google_translate_word(word).lower()
                     database.insert_dictionary_db(message.chat.id, word, word_translate)
 
         error_mes = ''
@@ -215,33 +217,22 @@ def start(message):
 def start(message):
     message_args = message.text.split(' ')
 
+    text = message.text.replace('/translate ', '')
+    translate_text = function.google_translate_word(text)
     if len(message_args) == 1:
 
-        bot.send_message(message.chat.id, '*Введите слово которое хотите перевести*\n\n`/translate [word]`\n\n'
-                                          '*Доступные переводы:*\n'
-                                          '_- C русского на английский\n- С английского на русский_',
-                         parse_mode="Markdown")
+        response_message = '*Введите слово/фразу которое(-ую) хотите перевести*\n' \
+                           '`/translate [word]`\n\n' \
+                           '*Доступные переводы:*\n' \
+                           '_- C русского на английский\n- С английского на русский_'
+    elif len(translate_text) <= 0:
 
-    elif len(message_args) > 2:
-
-        bot.send_message(message.chat.id, '*Можно перевести только одно слово*\n\n`/translate [word]`\n\n'
-                                          '*Доступные переводы:*\n'
-                                          '_- C русского на английский\n- С английского на русский_',
-                         parse_mode="Markdown")
-
+        response_message = '*Перевод не возможен*\n\n• Проверьте написание слова' \
+                           '\n• Перевод доступен с английского и русского'
     else:
+        response_message = 'Перевод\n\n*' + text + '* - _' + function.google_translate_word(text) + '_'
 
-        word = message.text.split(' ')[1]
-
-        if function.check_spelling_en(word) or function.check_spelling_ru(word):
-
-            response_message = 'Перевод\n\n*' + word + '* - _' + function.google_translate_word(word) + '_'
-            bot.send_message(message.chat.id, response_message, parse_mode="Markdown")
-        else:
-
-            response_message = '*Перевод не возможен*\n\n• Проверьте написание слова' \
-                               '\n• Перевод доступен с английского и русского'
-            bot.send_message(message.chat.id, response_message, parse_mode="Markdown")
+    bot.send_message(message.chat.id, response_message, parse_mode="Markdown")
 
 
 bot.polling(none_stop=True, interval=0)
