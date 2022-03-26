@@ -1,7 +1,6 @@
 import telebot
 import config
 import database
-import command
 import function
 import re
 
@@ -34,21 +33,27 @@ def start(message):
     else:
         words = args
         words.pop(0)
+        words_list = []
 
         for word in words:
+
             word.lower()
+
             word = re.sub("[.|.|?]", "", word)
+
             word_translate = function.google_translate_word(word).lower()
+
             # checking for error
             if not function.check_spelling_en(word) or \
                     re.sub("[0-9]", "", word) == "" or \
                     len(word) < 2 or \
                     len(word_translate) <= 0:
-                error_word.append('_' + word + '_' + ' - слово написано с ошибкой')
+                error_word.append('*• ' + word + '* - слово написано с ошибкой')
             else:
                 if database.check_repeat_word(message.chat.id, word)[0][0] > 0:
-                    error_word.append('_' + word + '_' + ' - слово уже есть в словаре')
+                    error_word.append('*• ' + word + '* - слово уже есть в словаре')
                 else:
+                    words_list.append('*• ' + word + '* - ' + word_translate)
                     database.insert_dictionary_db(message.chat.id, word, word_translate)
 
         error_mes = ''
@@ -62,7 +67,9 @@ def start(message):
             response_message = '*В словарь были добавлены слова, кроме*\n\n' + error_mes
 
         else:
-            response_message = '*Cлово(-а) было(-и) добавлено(-ы)*'
+            response_message = '*Cлово(-а) было(-и) добавлено(-ы)\n\n*'
+            for word in words_list:
+                response_message += word + '\n'
 
         bot.send_message(message.chat.id, response_message, parse_mode="Markdown")
 
@@ -70,14 +77,28 @@ def start(message):
 # Команда вывода словаря пользователя
 @bot.message_handler(commands=["dictionary"])
 def start(message):
-    dictionary_list = command.get_dictionary(message.chat.id)
-    message_res = '*Ваш словарь: \n\n№. слово - перевод | процет ответов\n*'
 
-    for word in dictionary_list:
-        # word[0] - id / word[1] - word / word[2] - translate / word[3] - statistic of tests
-        message_res += str(word[0]) + '. ' + word[1] + ' - ' + word[2] + ' | ' + str(word[3]) + '%\n'
+    count = 0
+    response_message = '*Ваш словарь: \n\n№. слово - перевод | процент ответов\n*'
 
-    bot.send_message(message.chat.id, message_res, parse_mode="Markdown")
+    user_db_dict = database.select_dictionary_db(message.chat.id)
+
+    for row in user_db_dict:
+
+        result_test = 0
+        count += 1
+
+        word = row[2]
+        translate_word = row[5]
+
+        # row[3] - кол-во раз попав в тесте
+        # row[4] - кол-во раз ответ в тесте
+        if row[3] != 0:
+            result_test = row[4] // row[3] * 100
+
+        response_message += str(count) + '. ' + word + ' - ' + translate_word + ' | _' + str(result_test) + '%_\n'
+
+    bot.send_message(message.chat.id, response_message, parse_mode="Markdown")
 
 
 # Команда удаления слова из словаря пользователя
