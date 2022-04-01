@@ -21,7 +21,7 @@ def start(message):
 @bot.message_handler(commands=["add"])
 def start(message):
     args = message.text.split(' ')
-    error_word = []
+    error_word_list = []
 
     # checking for arguments
     if len(args) <= 1:
@@ -33,7 +33,7 @@ def start(message):
     else:
         words = args
         words.pop(0)
-        words_list = []
+        add_words_list = []
 
         for word in words:
 
@@ -48,27 +48,27 @@ def start(message):
                     re.sub("[0-9]", "", word) == "" or \
                     len(word) < 2 or \
                     len(word_translate) <= 0:
-                error_word.append('*• ' + word + '* - слово написано с ошибкой')
+                error_word_list.append('*• ' + word + '* - слово написано с ошибкой')
             else:
                 if database.check_repeat_word(message.chat.id, word)[0][0] > 0:
-                    error_word.append('*• ' + word + '* - слово уже есть в словаре')
+                    error_word_list.append('*• ' + word + '* - слово уже есть в словаре')
                 else:
-                    words_list.append('*• ' + word + '* - ' + word_translate)
+                    add_words_list.append('*• ' + word + '* - ' + word_translate)
                     database.insert_dictionary_db(message.chat.id, word, word_translate)
 
         error_mes = ''
-        for word in error_word:
+        for word in error_word_list:
             error_mes += '• ' + word + '\n'
 
-        if len(error_word) == len(words):
+        if len(error_word_list) == len(words):
             response_message = '*Слово(-а) не было(-и) добавлено(-ы)*\n\n' + error_mes
 
-        elif len(error_word) > 0:
+        elif len(error_word_list) > 0:
             response_message = '*В словарь были добавлены слова, кроме*\n\n' + error_mes
 
         else:
             response_message = '*Cлово(-а) было(-и) добавлено(-ы)\n\n*'
-            for word in words_list:
+            for word in add_words_list:
                 response_message += word + '\n'
 
         bot.send_message(message.chat.id, response_message, parse_mode="Markdown")
@@ -230,7 +230,23 @@ def start(message):
 # Команда составления теста
 @bot.message_handler(commands=["test"])
 def start(message):
-    bot.send_message(message.chat.id, 'Test')
+    function.get_test(message.chat.id, 5)
+    # args = message.text.split(' ')
+    #
+    # if len(args) <= 1:
+    #     print('args < 1')
+    # else:
+    #     num_question = int(args[1])
+    #
+    #     if num_question > database.count_user_dict(message.chat.id):
+    #         print('num_question < database.count_user_dict(message.chat.id)')
+    #
+    #     else:
+    #
+    #         test_list = function.get_test(message.chat.id, num_question)
+    #         for element_test in test_list:
+    #             print(element_test)
+    # bot.send_message(message.chat.id, 'Test')
 
 
 # Команда для перевода слов

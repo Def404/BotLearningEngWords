@@ -114,3 +114,18 @@ def del_dict_user(user_id):
     finally:
         if sqlite_connection:
             sqlite_connection.close()
+
+
+def count_user_dict(user_id):
+    try:
+        sqlite_connection = sqlite3.connect('tg_database.db')
+        cursor = sqlite_connection.cursor()
+        cursor.execute("SELECT COUNT() FROM user_dictionary WHERE Uid=(?)", (user_id,))
+        return cursor.fetchall()[0][0]
+
+    except sqlite3.Error as error:
+        print(error.args)
+
+    finally:
+        if sqlite_connection:
+            sqlite_connection.close()
