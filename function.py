@@ -61,12 +61,14 @@ def get_test(user_id, num_questions):
     medium_words_list = []
     hard_words_list = []
 
+    # определяем кол-во слов для каждой группы
     num_easy_words = int_r(num_questions * 60 / 100)
     num_medium_words = int_r(num_questions * 25 / 100)
     num_hard_words = int_r(num_questions * 15 / 100)
 
     words_db_list = database.select_dictionary_db(user_id)
 
+    # распределяем все слова по группам
     for word in words_db_list:
         if word[3] == 0:
             result_word_test = 0
@@ -82,6 +84,7 @@ def get_test(user_id, num_questions):
         else:
             hard_words_list.append(word)
 
+    # получаем для каждой группы нужное кол-ов слов (рандомно)
     test_group_easy = get_word_test(easy_words_list, num_easy_words)
     test_group_medium = get_word_test(medium_words_list, num_medium_words)
     test_group_hard = get_word_test(hard_words_list, num_hard_words)
@@ -93,14 +96,17 @@ def get_test(user_id, num_questions):
     # print(test_group_medium)
     # print(test_group_hard)
 
+    # в случает если для одной из групп не хватает слов
     if len(test_group_easy) < num_easy_words or \
             len(test_group_medium) < num_medium_words or \
             len(test_group_hard) < num_hard_words:
 
+        # определяем кол-во нехват. слов
         cont = num_easy_words - len(test_group_easy) + \
                num_medium_words - len(test_group_medium) + \
                num_hard_words - len(test_group_hard)
 
+        # исключаем уже выбранные слова
         for el in easy_words_list:
             counter = 0
             for el_2 in test_list:
@@ -110,13 +116,20 @@ def get_test(user_id, num_questions):
                 new_list.append(el)
 
         # print(new_list)
+        # выбираем оставшиеся слова
         missing_words_list = get_word_test(new_list, cont)
         # print(missing_words_list)
         test_list += missing_words_list
 
+    # перемешиваем слова
     random.shuffle(test_list)
 
-    # print(test_list)
+    # обновляем счетчик кол-ва раз, заданных в тесте
+    for test_el in test_list:
+        test_el_list = list(test_el)
+        test_el_list[3] += 1
+        database.update_ask(user_id, test_el_list[2], test_el_list[3])
+
     return test_list
 
 

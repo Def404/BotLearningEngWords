@@ -129,3 +129,18 @@ def count_user_dict(user_id):
     finally:
         if sqlite_connection:
             sqlite_connection.close()
+
+
+def update_ask(user_id, word, new_ask):
+    try:
+        sqlite_connection = sqlite3.connect('tg_database.db')
+        cursor = sqlite_connection.cursor()
+        cursor.execute("UPDATE user_dictionary SET Asked=(?) WHERE Uid=(?) and Word=(?)", (new_ask, user_id, word))
+        sqlite_connection.commit()
+
+    except sqlite3.Error as error:
+        print(error.args)
+
+    finally:
+        if sqlite_connection:
+            sqlite_connection.close()

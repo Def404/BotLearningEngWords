@@ -1,3 +1,4 @@
+import random
 import telebot
 import config
 import database
@@ -204,10 +205,15 @@ def callback_worker(call):
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.delete_message(call.message.chat.id, call.message.message_id -1)
 
-    elif call.data == 'del_dict_btn':
-        database.del_dict_user(call.message.chat.id)
-        bot.delete_message(call.message.chat.id, call.message.message_id)
-        bot.send_message(call.message.chat.id, 'Словарь был очищен')
+    # elif call.data == 'del_dict_btn':
+    #     database.del_dict_user(call.message.chat.id)
+    #     bot.delete_message(call.message.chat.id, call.message.message_id)
+    #     bot.send_message(call.message.chat.id, 'Словарь был очищен')
+
+    elif call.data.key == 'test':
+        callback = call.data
+
+        print(callback)
 
     else:
 
@@ -227,10 +233,35 @@ def start(message):
     created_btn_new_cmd(message, message.message_id)
 
 
+def test_btn(word, test_list):
+
+    return
+
 # Команда составления теста
 @bot.message_handler(commands=["test"])
 def start(message):
-    function.get_test(message.chat.id, 5)
+    keyboard = types.InlineKeyboardMarkup()
+
+    test_list = function.get_test(message.chat.id, 5)
+
+    question = test_list[0]
+    word = question[2]
+
+    other_words = function.get_word_test(database.select_dictionary_db(message.chat.id), 3)
+    ans_list = []
+    for el in other_words:
+        ans_list.append(el[5])
+
+    ans_list.append(question[5])
+
+    random.shuffle(ans_list)
+    callback = ['test', word, test_list]
+    bt1 = types.InlineKeyboardButton(text=ans_list[0], callback_data=callback)
+    bt2 = types.InlineKeyboardButton(text=ans_list[1], callback_data=callback)
+    bt3 = types.InlineKeyboardButton(text=ans_list[2], callback_data=callback)
+    bt4 = types.InlineKeyboardButton(text=ans_list[3], callback_data=callback)
+    keyboard.add(bt1, bt2)
+    keyboard.add(bt3, bt4)
     # args = message.text.split(' ')
     #
     # if len(args) <= 1:
@@ -246,7 +277,7 @@ def start(message):
     #         test_list = function.get_test(message.chat.id, num_question)
     #         for element_test in test_list:
     #             print(element_test)
-    # bot.send_message(message.chat.id, 'Test')
+    bot.send_message(message.chat.id, 'Как переводится слово: ' + word, reply_markup=keyboard)
 
 
 # Команда для перевода слов
