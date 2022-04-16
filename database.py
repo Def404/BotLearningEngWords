@@ -33,6 +33,23 @@ def select_dictionary_db(user_id):
             sqlite_connection.close()
 
 
+def select_eng_words():
+    try:
+        sqlite_connection = sqlite3.connect('tg_database.db')
+        cursor = sqlite_connection.cursor()
+        cursor.execute("SELECT * FROM eng_words_dictionary")
+        return cursor.fetchall()
+
+    except sqlite3.Error as error:
+        print(error.args)
+        s = []
+        return s
+
+    finally:
+        if sqlite_connection:
+            sqlite_connection.close()
+
+
 def insert_dictionary_db(user_id, word, word_translate):
 
     try:
@@ -140,6 +157,23 @@ def update_ask(user_id, word, new_ask):
 
     except sqlite3.Error as error:
         print(error.args)
+
+    finally:
+        if sqlite_connection:
+            sqlite_connection.close()
+
+
+def get_word_by_id(id):
+    try:
+        sqlite_connection = sqlite3.connect('tg_database.db')
+        cursor = sqlite_connection.cursor()
+        cursor.execute("SELECT * FROM user_dictionary WHERE Id=:id", {"id": id})
+        return cursor.fetchall()
+
+    except sqlite3.Error as error:
+        print(error.args)
+        s = []
+        return s
 
     finally:
         if sqlite_connection:

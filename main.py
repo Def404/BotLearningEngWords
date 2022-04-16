@@ -4,9 +4,9 @@ import config
 import database
 import function
 import re
+import json
 
 from telebot import types
-
 
 bot = telebot.TeleBot(config.token)
 print('Start bot')
@@ -78,7 +78,6 @@ def start(message):
 # Команда вывода словаря пользователя
 @bot.message_handler(commands=["dictionary"])
 def start(message):
-
     count = 0
     response_message = '*Ваш словарь: \n\n№. слово - перевод | процент ответов\n*'
 
@@ -128,7 +127,6 @@ def start(message):
 
 @bot.message_handler(commands=["deldictionary"])
 def start(message):
-
     keyboard = types.InlineKeyboardMarkup()
 
     cnl_del_dict_btn = types.InlineKeyboardButton(text='Отмена', callback_data='cnl_del_dict_btn')
@@ -166,7 +164,27 @@ def created_btn_new_cmd(message, message_id):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
 
-    if call.data == 'cnl_del_word_btn':
+    res = json.loads(call.data)
+
+    if res['key'] == 'next_question':
+        questions_id_list = list(res['q_l'])
+        question = database.get_word_by_id(questions_id_list[0])[0]
+
+        created_poll(call.message.chat.id, question)
+
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+
+        if len(questions_id_list) > 1:
+            questions_id_list.pop(0)
+            callback_str = """{"key": "next_question", "q_l": """ + str(questions_id_list) + """}"""
+            keyboard = types.InlineKeyboardMarkup()
+            btn1 = types.InlineKeyboardButton(text='Да', callback_data=callback_str)
+            keyboard.add(btn1)
+            bot.send_message(call.message.chat.id, 'Следующий вопрос?', reply_markup=keyboard)
+        else:
+            bot.send_message(call.message.chat.id, 'Тест завершен')
+
+    elif call.data == 'cnl_del_word_btn':
 
         # Обработчик кнопки отмена команды /delword
         bot.delete_message(call.message.chat.id, call.message.message_id)
@@ -203,17 +221,12 @@ def callback_worker(call):
 
     elif call.data == 'cnl_del_dict_btn':
         bot.delete_message(call.message.chat.id, call.message.message_id)
-        bot.delete_message(call.message.chat.id, call.message.message_id -1)
+        bot.delete_message(call.message.chat.id, call.message.message_id - 1)
 
-    # elif call.data == 'del_dict_btn':
-    #     database.del_dict_user(call.message.chat.id)
-    #     bot.delete_message(call.message.chat.id, call.message.message_id)
-    #     bot.send_message(call.message.chat.id, 'Словарь был очищен')
-
-    elif call.data.key == 'test':
-        callback = call.data
-
-        print(callback)
+    elif call.data == 'del_dict_btn':
+        database.del_dict_user(call.message.chat.id)
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        bot.send_message(call.message.chat.id, 'Словарь был очищен')
 
     else:
 
@@ -233,51 +246,51 @@ def start(message):
     created_btn_new_cmd(message, message.message_id)
 
 
-def test_btn(word, test_list):
-
-    return
-
 # Команда составления теста
 @bot.message_handler(commands=["test"])
 def start(message):
+
+    questions_list = function.get_test(message.chat.id, 5)
+
+    question_1st = questions_list[0]
+    created_poll(message.chat.id, question_1st)
+
+    questions_id_list = []
+
+    for question in questions_list:
+        questions_id_list.append(question[0])
+
+    questions_id_list.pop(0)
+
+    callback_str = """{"key": "next_question", "q_l": """ + str(questions_id_list) + """}"""
     keyboard = types.InlineKeyboardMarkup()
+    btn1 = types.InlineKeyboardButton(text='Да', callback_data=callback_str)
+    keyboard.add(btn1)
+    bot.send_message(message.chat.id, 'Следующий вопрос?', reply_markup=keyboard)
 
-    test_list = function.get_test(message.chat.id, 5)
 
-    question = test_list[0]
-    word = question[2]
+@bot.poll_answer_handler(func=lambda message: True)
+def my_poll(message):
+    print(this_quiz.poll)
 
-    other_words = function.get_word_test(database.select_dictionary_db(message.chat.id), 3)
-    ans_list = []
-    for el in other_words:
-        ans_list.append(el[5])
 
-    ans_list.append(question[5])
+def created_poll(chat_id, question):
+    question_str = 'Как переводтся слово: ' + question[2] + '?'
 
-    random.shuffle(ans_list)
-    callback = ['test', word, test_list]
-    bt1 = types.InlineKeyboardButton(text=ans_list[0], callback_data=callback)
-    bt2 = types.InlineKeyboardButton(text=ans_list[1], callback_data=callback)
-    bt3 = types.InlineKeyboardButton(text=ans_list[2], callback_data=callback)
-    bt4 = types.InlineKeyboardButton(text=ans_list[3], callback_data=callback)
-    keyboard.add(bt1, bt2)
-    keyboard.add(bt3, bt4)
-    # args = message.text.split(' ')
-    #
-    # if len(args) <= 1:
-    #     print('args < 1')
-    # else:
-    #     num_question = int(args[1])
-    #
-    #     if num_question > database.count_user_dict(message.chat.id):
-    #         print('num_question < database.count_user_dict(message.chat.id)')
-    #
-    #     else:
-    #
-    #         test_list = function.get_test(message.chat.id, num_question)
-    #         for element_test in test_list:
-    #             print(element_test)
-    bot.send_message(message.chat.id, 'Как переводится слово: ' + word, reply_markup=keyboard)
+    other_answers = function.get_word_test(database.select_eng_words(), 3)
+
+    other_answer_words = []
+    for answer_word in other_answers:
+        other_answer_words.append(function.google_translate_word(answer_word[1]))
+
+    other_answer_words.append(question[5])
+
+    random.shuffle(other_answer_words)
+    correct_option_id = other_answer_words.index(question[5])
+    explanation = 'Правильный ответ: ' + question[5]
+    global this_quiz
+    this_quiz = bot.send_poll(chat_id=chat_id, question=question_str, options=other_answer_words, type='quiz',
+                  correct_option_id=correct_option_id, explanation=explanation, is_anonymous=False)
 
 
 # Команда для перевода слов
