@@ -53,12 +53,12 @@ def add(message):
                     len(word) < 2 or \
                     len(word_translate) <= 0:
 
-                error_words_list.append('*• ' + word + '* - слово написано с ошибкой')
+                error_words_list.append('* ' + word + '* - слово написано с ошибкой')
             else:
-                if database.check_repeat_word(message.chat.id, word)[0][0] > 0:
-                    error_words_list.append('*• ' + word + '* - слово уже есть в словаре')
+                if database.check_repeat_word(message.chat.id, word) > 0:
+                    error_words_list.append('* ' + word + '* - слово уже есть в словаре')
                 else:
-                    add_words_list.append('*• ' + word + '* - ' + word_translate)
+                    add_words_list.append('* ' + word + '* - ' + word_translate)
                     database.set_user_word(message.chat.id, word, word_translate)
 
         error_message = ''
@@ -126,15 +126,14 @@ def delword(message):
         if database.check_repeat_word(message.chat.id, del_word) > 0:
 
             keyboard = types.InlineKeyboardMarkup()
+            del_word_str = '"' + del_word + '"'
 
-            callback_del_str = """{"key": "del_word", "word": """ + delword + """}"""
-            del_word_btn = types.InlineKeyboardButton(text='Удалить',
-                                                      callback_data=callback_del_str)
+            callback_del_str = """{"key": "del_word_btn", "word_text": """ + del_word_str + """}"""
+            del_word_btn = types.InlineKeyboardButton(text='Удалить', callback_data=callback_del_str)
             keyboard.add(del_word_btn)
 
             callback_cnl_str = """{"key": "cnl_del_word"}"""
-            cnl_del_word_btn = types.InlineKeyboardButton(text='Отмена',
-                                                          callback_data=callback_cnl_str)
+            cnl_del_word_btn = types.InlineKeyboardButton(text='Отмена', callback_data=callback_cnl_str)
             keyboard.add(cnl_del_word_btn)
 
             message_text = 'Вы точно хотите удалить слово "*' + del_word + '*"?'
@@ -270,7 +269,7 @@ def test(message):
                              message_text,
                              parse_mode="Markdown")
         else:
-            questions_list = function.get_test(message.chat.id, num_question)
+            questions_list = function.get_test(message.chat.id, 5)
 
             question_1st = questions_list[0]
             created_poll(message.chat.id, question_1st)
@@ -301,7 +300,7 @@ def created_poll(chat_id, question):
 
     other_answer_words = []
     for answer_word in other_answers:
-        other_answer_words.append(function.google_translate_word(answer_word))
+        other_answer_words.append(function.google_translate_word(answer_word[0]))
 
     other_answer_words.append(question[5])
 
@@ -360,9 +359,9 @@ def callback_worker(call):
             bot.send_message(call.message.chat.id,
                              'Тест завершен')
 
-    elif callback['key'] == 'del_word':
-
-        del_word = callback['word']
+    elif callback['key'] == 'del_word_btn':
+        print(callback['word_text'])
+        del_word = callback['word_text']
         chat_id = call.message.chat.id
 
         database.delete_word(chat_id, del_word)
