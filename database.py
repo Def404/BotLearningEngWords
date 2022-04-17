@@ -16,7 +16,7 @@ def created_db():
             print("Connection close")
 
 
-def select_dictionary_db(user_id):
+def get_user_dict(user_id):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
@@ -33,11 +33,11 @@ def select_dictionary_db(user_id):
             sqlite_connection.close()
 
 
-def select_eng_words():
+def get_eng_words():
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
-        cursor.execute("SELECT * FROM eng_words_dictionary")
+        cursor.execute("SELECT word FROM eng_words_dictionary")
         return cursor.fetchall()
 
     except sqlite3.Error as error:
@@ -50,7 +50,7 @@ def select_eng_words():
             sqlite_connection.close()
 
 
-def insert_dictionary_db(user_id, word, word_translate):
+def set_user_word(user_id, word, word_translate):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
@@ -73,7 +73,7 @@ def check_repeat_word(user_id, word):
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
         cursor.execute("SELECT COUNT() FROM user_dictionary WHERE Uid=(?) AND Word=(?)", (user_id, word))
-        return cursor.fetchall()
+        return cursor.fetchall()[0][0]
 
     except sqlite3.Error as error:
         print(error.args)
@@ -99,23 +99,6 @@ def delete_word(user_id, word):
             sqlite_connection.close()
 
 
-def get_words():
-    try:
-        sqlite_connection = sqlite3.connect('tg_database.db')
-        cursor = sqlite_connection.cursor()
-        cursor.execute("SELECT word FROM eng_words_dictionary")
-        return cursor.fetchall()
-
-    except sqlite3.Error as error:
-        print(error.args)
-        s = []
-        return s
-
-    finally:
-        if sqlite_connection:
-            sqlite_connection.close()
-
-
 def del_dict_user(user_id):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
@@ -132,7 +115,7 @@ def del_dict_user(user_id):
             sqlite_connection.close()
 
 
-def count_user_dict(user_id):
+def count_user_words(user_id):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
@@ -147,7 +130,7 @@ def count_user_dict(user_id):
             sqlite_connection.close()
 
 
-def update_ask(user_id, word, new_ask):
+def set_ask_word(user_id, word, new_ask):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
@@ -162,11 +145,11 @@ def update_ask(user_id, word, new_ask):
             sqlite_connection.close()
 
 
-def get_word_by_id(id):
+def get_word_by_id(word_id):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
-        cursor.execute("SELECT * FROM user_dictionary WHERE Id=:id", {"id": id})
+        cursor.execute("SELECT * FROM user_dictionary WHERE Id=:id", {"id": word_id})
         return cursor.fetchall()
 
     except sqlite3.Error as error:
@@ -179,7 +162,7 @@ def get_word_by_id(id):
             sqlite_connection.close()
 
 
-def set_answer(user_id, word):
+def set_answer_word(user_id, word):
     new_answered = 0
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
