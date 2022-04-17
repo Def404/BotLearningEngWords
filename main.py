@@ -164,7 +164,6 @@ def created_btn_new_cmd(message, message_id):
 # Обработчик кнопок
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
-
     res = json.loads(call.data)
 
     if res['key'] == 'next_question':
@@ -250,24 +249,40 @@ def start(message):
 # Команда составления теста
 @bot.message_handler(commands=["test"])
 def start(message):
+    args = message.text.split(' ')
+    if len(args) <= 1:
+        bot.send_message(message.chat.id, '*Введите кол-во вопросов в тесте (максимум 10)*\n\n'
+                                          '`/test [number]`',
+                         parse_mode="Markdown")
+    else:
+        num_question = int(args[1])
 
-    questions_list = function.get_test(message.chat.id, 5)
+        if num_question > database.count_user_dict(message.chat.id):
+            bot.send_message(message.chat.id, '*Слов из Вашего словаря не хватает для составления теста*\n\n'
+                                              '`Возможное кол-во: ' + str(database.count_user_dict(message.chat.id)) +
+                             '` ',
+                             parse_mode="Markdown")
+        elif num_question > 10:
+            bot.send_message(message.chat.id, '*Тест может состоять максимум из 10 вопросов*\n\n',
+                             parse_mode="Markdown")
+        else:
+            questions_list = function.get_test(message.chat.id, num_question)
 
-    question_1st = questions_list[0]
-    created_poll(message.chat.id, question_1st)
+            question_1st = questions_list[0]
+            created_poll(message.chat.id, question_1st)
 
-    questions_id_list = []
+            questions_id_list = []
 
-    for question in questions_list:
-        questions_id_list.append(question[0])
+            for question in questions_list:
+                questions_id_list.append(question[0])
 
-    questions_id_list.pop(0)
+            questions_id_list.pop(0)
 
-    callback_str = """{"key": "next_question", "q_l": """ + str(questions_id_list) + """}"""
-    keyboard = types.InlineKeyboardMarkup()
-    btn1 = types.InlineKeyboardButton(text='Да', callback_data=callback_str)
-    keyboard.add(btn1)
-    bot.send_message(message.chat.id, 'Следующий вопрос?', reply_markup=keyboard)
+            callback_str = """{"key": "next_question", "q_l": """ + str(questions_id_list) + """}"""
+            keyboard = types.InlineKeyboardMarkup()
+            btn1 = types.InlineKeyboardButton(text='Да', callback_data=callback_str)
+            keyboard.add(btn1)
+            bot.send_message(message.chat.id, 'Следующий вопрос?', reply_markup=keyboard)
 
 
 @bot.poll_answer_handler(func=lambda message: True)
@@ -296,7 +311,7 @@ def created_poll(chat_id, question):
     explanation = 'Правильный ответ: ' + question[5]
     global this_quiz
     this_quiz = bot.send_poll(chat_id=chat_id, question=question_str, options=other_answer_words, type='quiz',
-                  correct_option_id=correct_option_id, explanation=explanation, is_anonymous=False)
+                              correct_option_id=correct_option_id, explanation=explanation, is_anonymous=False)
 
 
 # Команда для перевода слов

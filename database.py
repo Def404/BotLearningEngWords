@@ -51,7 +51,6 @@ def select_eng_words():
 
 
 def insert_dictionary_db(user_id, word, word_translate):
-
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
@@ -200,7 +199,8 @@ def set_answer(user_id, word):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
-        cursor.execute("UPDATE user_dictionary SET Answered=(?) WHERE Uid=(?) and Word=(?)", (new_answered, user_id, word))
+        cursor.execute("UPDATE user_dictionary SET Answered=(?) WHERE Uid=(?) and Word=(?)",
+                       (new_answered, user_id, word))
         sqlite_connection.commit()
 
     except sqlite3.Error as error:
