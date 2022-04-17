@@ -178,3 +178,34 @@ def get_word_by_id(id):
     finally:
         if sqlite_connection:
             sqlite_connection.close()
+
+
+def set_answer(user_id, word):
+    new_answered = 0
+    try:
+        sqlite_connection = sqlite3.connect('tg_database.db')
+        cursor = sqlite_connection.cursor()
+        cursor.execute("SELECT Answered FROM user_dictionary WHERE Uid=(?) and Word=(?)", (user_id, word))
+        new_answered = cursor.fetchall()[0][0]
+
+    except sqlite3.Error as error:
+        print(error.args)
+
+    finally:
+        if sqlite_connection:
+            sqlite_connection.close()
+
+    new_answered += 1
+
+    try:
+        sqlite_connection = sqlite3.connect('tg_database.db')
+        cursor = sqlite_connection.cursor()
+        cursor.execute("UPDATE user_dictionary SET Answered=(?) WHERE Uid=(?) and Word=(?)", (new_answered, user_id, word))
+        sqlite_connection.commit()
+
+    except sqlite3.Error as error:
+        print(error.args)
+
+    finally:
+        if sqlite_connection:
+            sqlite_connection.close()

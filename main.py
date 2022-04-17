@@ -94,7 +94,8 @@ def start(message):
         # row[3] - кол-во раз попав в тесте
         # row[4] - кол-во раз ответ в тесте
         if row[3] != 0:
-            result_test = row[4] // row[3] * 100
+            result_test = row[4] / row[3] * 100
+            result_test = round(result_test, 1)
 
         response_message += str(count) + '. ' + word + ' - ' + translate_word + ' | _' + str(result_test) + '%_\n'
 
@@ -271,7 +272,12 @@ def start(message):
 
 @bot.poll_answer_handler(func=lambda message: True)
 def my_poll(message):
-    print(this_quiz.poll)
+    if this_quiz.poll.correct_option_id == message.option_ids[0]:
+        question = this_quiz.poll.question
+        question_word = question.replace('Как переводтся слово: ', '')
+        question_word = question_word.replace('?', '')
+        user_id = message.user.id
+        database.set_answer(user_id, question_word)
 
 
 def created_poll(chat_id, question):
