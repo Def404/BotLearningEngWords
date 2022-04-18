@@ -254,8 +254,9 @@ def translate(message):
                      response_message,
                      parse_mode="Markdown")
 
+
 @bot.message_handler(commands=["info", "help"])
-def help(message):
+def info(message):
     message_text = 'Данный бот позволит Вам изучить английские слова!\n\n' \
                     'Вы сможете хранить все изученые слова в одном месте\n' \
                     'Пройти тест на знание изученных слов\n' \
@@ -275,6 +276,14 @@ def help(message):
                      message_text,
                      parse_mode="Markdown")
 
+
+@bot.message_handler(content_types=["text"])
+def text(message):
+    message_text = 'Я не понимаю :(\n\n' \
+                   'Воспользуйтесь командой: `/info`'
+    bot.send_message(message.chat.id,
+                     message_text,
+                     parse_mode="Markdown")
 
 # Команда составления теста
 @bot.message_handler(commands=["test"])
