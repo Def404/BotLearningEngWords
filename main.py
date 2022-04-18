@@ -15,7 +15,25 @@ print('Start bot')
 # Команда старта
 @bot.message_handler(commands=["start"])
 def start(message):
-    bot.send_message(message.chat.id, 'Привет, ' + str(message.chat.first_name) + '! Начни изучать слова!')
+    message_text = 'Привет, *' + str(message.chat.first_name) + '*!\n'
+    message_text += 'Данный бот позволит Вам изучить английские слова!\n\n' \
+                    'Вы сможете хранить все изученые слова в одном месте\n' \
+                    'Пройти тест на знание изученных слов\n' \
+                    'Переводить слова и фразы\n\n' \
+                    '*Команды:*\n' \
+                    '`/new - изучить новое слово\n' \
+                    '/add [слово] - добавть слово в словарь\n' \
+                    '/add [слово] [слово] - добавить несколько слов в словарь\n' \
+                    '/dictionary - Ваш словарь\n' \
+                    '/test [количество вопросов] - пройти тест на изучение слов (максимум 10 вопросов)\n' \
+                    '/translate [слово/фраза] - перевод слов и фраз  (С английского на русский; С русского на английский)\n' \
+                    '/delword [слово] - удалить слово из словаря\n' \
+                    '/deldictionary - очистить словарь\n' \
+                    '/info | /help - информация о боте`\n\n' \
+                    'Разработчик: @adef15'
+    bot.send_message(message.chat.id,
+                     message_text,
+                     parse_mode="Markdown")
 
 
 # Команда добавления в словарь слова от пользователя
@@ -236,6 +254,27 @@ def translate(message):
                      response_message,
                      parse_mode="Markdown")
 
+@bot.message_handler(commands=["info", "help"])
+def help(message):
+    message_text = 'Данный бот позволит Вам изучить английские слова!\n\n' \
+                    'Вы сможете хранить все изученые слова в одном месте\n' \
+                    'Пройти тест на знание изученных слов\n' \
+                    'Переводить слова и фразы\n\n' \
+                    '*Команды:*\n' \
+                    '`/new - изучить новое слово\n' \
+                    '/add [слово] - добавть слово в словарь\n' \
+                    '/add [слово] [слово] - добавить несколько слов в словарь\n' \
+                    '/dictionary - Ваш словарь\n' \
+                    '/test [количество вопросов] - пройти тест на изучение слов (максимум 10 вопросов)\n' \
+                    '/translate [слово/фраза] - перевод слов и фраз  (С английского на русский; С русского на английский)\n' \
+                    '/delword [слово] - удалить слово из словаря\n' \
+                    '/deldictionary - очистить словарь\n' \
+                    '/info | /help - информация о боте`\n\n' \
+                    'Разработчик: @adef15'
+    bot.send_message(message.chat.id,
+                     message_text,
+                     parse_mode="Markdown")
+
 
 # Команда составления теста
 @bot.message_handler(commands=["test"])
@@ -269,7 +308,7 @@ def test(message):
                              message_text,
                              parse_mode="Markdown")
         else:
-            questions_list = function.get_test(message.chat.id, 5)
+            questions_list = function.get_test(message.chat.id, num_question)
 
             question_1st = questions_list[0]
             created_poll(message.chat.id, question_1st)
