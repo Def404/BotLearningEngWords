@@ -1,21 +1,7 @@
 import sqlite3
 
 
-def created_db():
-    try:
-        sqlite_connection = sqlite3.connect('tg_database.db', isolation_level=None)
-        cursor = sqlite_connection.cursor()
-        print('Connection successful')
-
-    except sqlite3.Error as error:
-        print(error.args)
-
-    finally:
-        if sqlite_connection:
-            sqlite_connection.close()
-            print("Connection close")
-
-
+# Получение всех слов пользователя из словаря
 def get_user_dict(user_id):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
@@ -33,6 +19,7 @@ def get_user_dict(user_id):
             sqlite_connection.close()
 
 
+# Получение всех анг слов
 def get_eng_words():
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
@@ -50,6 +37,7 @@ def get_eng_words():
             sqlite_connection.close()
 
 
+# Добавление в словарь нового слова
 def set_user_word(user_id, word, word_translate):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
@@ -68,6 +56,7 @@ def set_user_word(user_id, word, word_translate):
             sqlite_connection.close()
 
 
+# Проверка наличия слова в словаре
 def check_repeat_word(user_id, word):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
@@ -83,6 +72,7 @@ def check_repeat_word(user_id, word):
             sqlite_connection.close()
 
 
+# Удаление слова из словаря
 def delete_word(user_id, word):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
@@ -99,6 +89,7 @@ def delete_word(user_id, word):
             sqlite_connection.close()
 
 
+# Удаление всех слов из словаря
 def del_dict_user(user_id):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
@@ -115,6 +106,7 @@ def del_dict_user(user_id):
             sqlite_connection.close()
 
 
+# Получение количество слов в словаре пользователя
 def count_user_words(user_id):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
@@ -130,6 +122,7 @@ def count_user_words(user_id):
             sqlite_connection.close()
 
 
+# Обновление счетчика кол-ва попавш. раз в тесте для слова
 def set_ask_word(user_id, word, new_ask):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
@@ -145,6 +138,7 @@ def set_ask_word(user_id, word, new_ask):
             sqlite_connection.close()
 
 
+# Получение слова из словаря по ID
 def get_word_by_id(word_id):
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
@@ -162,8 +156,10 @@ def get_word_by_id(word_id):
             sqlite_connection.close()
 
 
+# Обновление счетчика кол-ва раз правильных ответов в тесте для слова
 def set_answer_word(user_id, word):
     new_answered = 0
+    # Сначала получаем предыдущие значение
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()
@@ -178,7 +174,7 @@ def set_answer_word(user_id, word):
             sqlite_connection.close()
 
     new_answered += 1
-
+    # Обновляем
     try:
         sqlite_connection = sqlite3.connect('tg_database.db')
         cursor = sqlite_connection.cursor()

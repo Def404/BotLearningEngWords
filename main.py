@@ -12,7 +12,7 @@ bot = telebot.TeleBot(config.token)
 print('Start bot')
 
 
-# Команда старта
+# Команда [/start] при начале работы с ботом
 @bot.message_handler(commands=["start"])
 def start(message):
     message_text = 'Привет, *' + str(message.chat.first_name) + '*!\n'
@@ -26,7 +26,8 @@ def start(message):
                     '/add [слово] [слово] - добавить несколько слов в словарь\n' \
                     '/dictionary - Ваш словарь\n' \
                     '/test [количество вопросов] - пройти тест на изучение слов (максимум 10 вопросов)\n' \
-                    '/translate [слово/фраза] - перевод слов и фраз  (С английского на русский; С русского на английский)\n' \
+                    '/translate [слово/фраза] - перевод слов и фраз  ' \
+                    '(С английского на русский; С русского на английский)\n' \
                     '/delword [слово] - удалить слово из словаря\n' \
                     '/deldictionary - очистить словарь\n' \
                     '/info | /help - информация о боте`\n\n' \
@@ -36,11 +37,14 @@ def start(message):
                      parse_mode="Markdown")
 
 
-# Команда добавления в словарь слова от пользователя
+# Команда добавления слов в словарь от пользователя
 @bot.message_handler(commands=["add"])
 def add(message):
     args = message.text.split(' ')
+    # Список слов не удовлетворяющих условию
     error_words_list = []
+    # Список слов, которые будут добавлены в словарь
+    add_words_list = []
 
     # checking for arguments
     if len(args) <= 1:
@@ -52,20 +56,22 @@ def add(message):
                          message_text,
                          parse_mode="Markdown")
     else:
+        # список слов для добавления
         words = args
         words.pop(0)
 
-        add_words_list = []
-
         for word in words:
-
             word.lower()
-
-            word = re.sub("[.|.|?]", "", word)
-
+            # удаляем из слов запрет символы
+            word = re.sub("[,|.|?]", "", word)
+            # переводим слово
             word_translate = function.google_translate_word(word).lower()
 
-            # checking for error
+            # Проверка слова на:
+            #       1. правописание
+            #       2. на наличие цифр
+            #       3. дли слова не должна быть меньше 2х
+            #       4. перевод слова должен существовать
             if not function.check_spelling_en(word) or \
                     re.sub("[0-9]", "", word) == "" or \
                     len(word) < 2 or \
@@ -79,9 +85,10 @@ def add(message):
                     add_words_list.append('* ' + word + '* - ' + word_translate)
                     database.set_user_word(message.chat.id, word, word_translate)
 
+        # Создаем сообщение для вывода пользователю
         error_message = ''
-        for word in error_words_list:
-            error_message += '• ' + word + '\n'
+        for error_word in error_words_list:
+            error_message += '• ' + error_word + '\n'
 
         if len(error_words_list) == len(words):
             response_message = '*Слово(-а) не было(-и) добавлено(-ы)*\n\n' + error_message
@@ -102,11 +109,13 @@ def add(message):
 # Команда вывода словаря пользователя
 @bot.message_handler(commands=["dictionary"])
 def dictionary(message):
+    # Порядковый номер слова
     count = 0
     response_message = '*Ваш словарь: \n\n№. слово - перевод | процент ответов\n*'
-
+    # Получаем слова пользователя
     words_user_list = database.get_user_dict(message.chat.id)
 
+    # Создаем сообщение для вывода
     for row in words_user_list:
 
         result_test = 0
@@ -140,9 +149,9 @@ def delword(message):
                          parse_mode="Markdown")
     else:
         del_word = message_args[1]
-
+        # Проверяем, что слово есть в словаре
         if database.check_repeat_word(message.chat.id, del_word) > 0:
-
+            # Создаем кнопки и callback message
             keyboard = types.InlineKeyboardMarkup()
             del_word_str = '"' + del_word + '"'
 
@@ -168,8 +177,10 @@ def delword(message):
                              parse_mode="Markdown")
 
 
+# Команда для очистки словаря пользователя
 @bot.message_handler(commands=["deldictionary"])
 def deldictionary(message):
+    # Создаем кнопки и callback message
     keyboard = types.InlineKeyboardMarkup()
 
     callback_del_str = """{"key": "del_dict"}"""
@@ -197,11 +208,13 @@ def new(message):
     created_btn_new_cmd(message, message.message_id)
 
 
+# Функция создания сообщения с новым словом и кнопками
 def created_btn_new_cmd(message, message_id):
-
+    # Получаем новое слово и его перевод
     new_word = function.get_random_word(message.chat.id)
     new_word_translate = function.google_translate_word(new_word).lower()
 
+    # Создаем кнопки и callback message
     keyboard = types.InlineKeyboardMarkup()
 
     callback_acc_str = """{"key": "accept_new_word"}"""
@@ -227,7 +240,7 @@ def created_btn_new_cmd(message, message_id):
                      parse_mode="Markdown")
 
 
-# Команда для перевода слов
+# Команда для перевода слов и фраз
 @bot.message_handler(commands=["translate"])
 def translate(message):
     message_args = message.text.split(' ')
@@ -255,35 +268,29 @@ def translate(message):
                      parse_mode="Markdown")
 
 
+# Команда для отображения информации
 @bot.message_handler(commands=["info", "help"])
 def info(message):
     message_text = 'Данный бот позволит Вам изучить английские слова!\n\n' \
-                    'Вы сможете хранить все изученые слова в одном месте\n' \
-                    'Пройти тест на знание изученных слов\n' \
-                    'Переводить слова и фразы\n\n' \
-                    '*Команды:*\n' \
-                    '`/new - изучить новое слово\n' \
-                    '/add [слово] - добавть слово в словарь\n' \
-                    '/add [слово] [слово] - добавить несколько слов в словарь\n' \
-                    '/dictionary - Ваш словарь\n' \
-                    '/test [количество вопросов] - пройти тест на изучение слов (максимум 10 вопросов)\n' \
-                    '/translate [слово/фраза] - перевод слов и фраз  (С английского на русский; С русского на английский)\n' \
-                    '/delword [слово] - удалить слово из словаря\n' \
-                    '/deldictionary - очистить словарь\n' \
-                    '/info | /help - информация о боте`\n\n' \
-                    'Разработчик: @adef15'
+                   'Вы сможете хранить все изученые слова в одном месте\n' \
+                   'Пройти тест на знание изученных слов\n' \
+                   'Переводить слова и фразы\n\n' \
+                   '*Команды:*\n' \
+                   '`/new - изучить новое слово\n' \
+                   '/add [слово] - добавть слово в словарь\n' \
+                   '/add [слово] [слово] - добавить несколько слов в словарь\n' \
+                   '/dictionary - Ваш словарь\n' \
+                   '/test [количество вопросов] - пройти тест на изучение слов (максимум 10 вопросов)\n' \
+                   '/translate [слово/фраза] - перевод слов и фраз  ' \
+                   '(С английского на русский; С русского на английский)\n' \
+                   '/delword [слово] - удалить слово из словаря\n' \
+                   '/deldictionary - очистить словарь\n' \
+                   '/info | /help - информация о боте`\n\n' \
+                   'Разработчик: @adef15'
     bot.send_message(message.chat.id,
                      message_text,
                      parse_mode="Markdown")
 
-
-@bot.message_handler(content_types=["text"])
-def text(message):
-    message_text = 'Я не понимаю :(\n\n' \
-                   'Воспользуйтесь командой: `/info`'
-    bot.send_message(message.chat.id,
-                     message_text,
-                     parse_mode="Markdown")
 
 # Команда составления теста
 @bot.message_handler(commands=["test"])
@@ -296,11 +303,19 @@ def test(message):
         bot.send_message(message.chat.id,
                          message_text,
                          parse_mode="Markdown")
+    # Проверяем, что аргумент число
+    elif not (args[1]).isdigit():
+        message_text = '*Количество должно быть числовым значением*\n\n' \
+                       '`/test [number]`'
+
+        bot.send_message(message.chat.id,
+                         message_text,
+                         parse_mode="Markdown")
     else:
         num_question = int(args[1])
 
         count_words_user = database.count_user_words(message.chat.id)
-
+        # Если заданное кол-во больше слов в словаре
         if num_question > count_words_user:
 
             message_text = '*Слов из Вашего словаря не хватает для составления теста*\n\n' \
@@ -310,8 +325,8 @@ def test(message):
                              message_text,
                              parse_mode="Markdown")
 
-        elif num_question > 10:
-            message_text = '*Тест может состоять максимум из 10 вопросов*'
+        elif num_question > 5:
+            message_text = '*Тест может состоять максимум из 5 вопросов*'
 
             bot.send_message(message.chat.id,
                              message_text,
@@ -328,9 +343,8 @@ def test(message):
                 questions_id_list.append(question[0])
 
             questions_id_list.pop(0)
-
+            # Создаем кнопки и callback message
             callback_str = """{"key": "next_question", "q_l": """ + str(questions_id_list) + """}"""
-
             keyboard = types.InlineKeyboardMarkup()
             btn1 = types.InlineKeyboardButton(text='Да',
                                               callback_data=callback_str)
@@ -341,8 +355,9 @@ def test(message):
                              reply_markup=keyboard)
 
 
+# Функция создания викторины
 def created_poll(chat_id, question):
-    question_str = 'Как переводтся слово: ' + question[2] + '?'
+    question_str = 'Как переводится слово: ' + question[2] + '?'
 
     other_answers = function.get_word_test(database.get_eng_words(), 3)
 
@@ -366,11 +381,12 @@ def created_poll(chat_id, question):
                               is_anonymous=False)
 
 
+# Обработчик события ответа на викторину
 @bot.poll_answer_handler(func=lambda message: True)
 def my_poll(message):
+    # Если верный ответ
     if this_quiz.poll.correct_option_id == message.option_ids[0]:
-
-        question_word = this_quiz.poll.question.replace('Как переводтся слово: ', '').replace('?', '')
+        question_word = this_quiz.poll.question.replace('Как переводится слово: ', '').replace('?', '')
         user_id = message.user.id
 
         database.set_answer_word(user_id, question_word)
@@ -381,12 +397,14 @@ def my_poll(message):
 def callback_worker(call):
     callback = json.loads(call.data)
 
+    # Для кнопки перехода на следующий вопрос в тесте
     if callback['key'] == 'next_question':
         questions_id_list = list(callback['q_l'])
         question = database.get_word_by_id(questions_id_list[0])[0]
 
         created_poll(call.message.chat.id, question)
 
+        # Удаляем предыдущую кнопку
         bot.delete_message(call.message.chat.id, call.message.message_id)
 
         if len(questions_id_list) > 1:
@@ -407,6 +425,7 @@ def callback_worker(call):
             bot.send_message(call.message.chat.id,
                              'Тест завершен')
 
+    # Кнопка для удаления слова
     elif callback['key'] == 'del_word_btn':
         print(callback['word_text'])
         del_word = callback['word_text']
@@ -421,17 +440,20 @@ def callback_worker(call):
                          message_text,
                          parse_mode="Markdown")
 
+    # Кнопка для отмены удаления слова
     elif callback['key'] == 'cnl_del_word':
+        # Удаляем сообщение с кнопкой и команду пользователя
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.delete_message(call.message.chat.id, call.message.message_id - 1)
 
+    # Кнопка добавления предложенного слова
     elif callback['key'] == 'accept_new_word':
-        text = call.message.text
-        text_list = text.split(' - ')
+        text_list = call.message.text.split(' - ')
 
         word = text_list[0]
         word_translate = text_list[1]
 
+        # Проверяем, что слово уже есть
         if database.check_repeat_word(call.message.chat.id, word) > 0:
             return
 
@@ -444,22 +466,36 @@ def callback_worker(call):
                          message_text,
                          parse_mode="Markdown")
 
+    # Кнопка смены слова
     elif callback['key'] == 'change_new_word':
         bot.delete_message(call.message.chat.id, call.message.message_id)
         created_btn_new_cmd(call.message, callback['message_id'])
 
+    # Кнопка отмены подбора новых слов
     elif callback['key'] == 'cancel_new_word':
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.delete_message(call.message.chat.id, callback['message_id'])
 
+    # Кнопка отмены удаления всех слов из словаря
     elif callback['key'] == 'cnl_del_dict':
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.delete_message(call.message.chat.id, call.message.message_id - 1)
 
+    # Кнопка удаления всех слов в словаре пользователя
     elif callback['key'] == 'del_dict':
         database.del_dict_user(call.message.chat.id)
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.send_message(call.message.chat.id, 'Словарь был очищен')
+
+
+# Обработчик события при вводе слов или не существующих команд
+@bot.message_handler(content_types=["text"])
+def text(message):
+    message_text = 'Я не понимаю :(\n\n' \
+                   'Воспользуйтесь командой: `/info`'
+    bot.send_message(message.chat.id,
+                     message_text,
+                     parse_mode="Markdown")
 
 
 bot.polling(none_stop=True, interval=0)
