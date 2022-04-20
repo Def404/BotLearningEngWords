@@ -1,6 +1,6 @@
 import random
 import telebot
-import config1
+import config
 import database
 import function
 import re
