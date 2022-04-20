@@ -297,7 +297,7 @@ def info(message):
 def test(message):
     args = message.text.split(' ')
     if len(args) <= 1:
-        message_text = '*Введите кол-во вопросов в тесте (максимум 10)*\n\n' \
+        message_text = '*Введите кол-во вопросов в тесте (максимум 5)*\n\n' \
                        '`/test [number]`'
 
         bot.send_message(message.chat.id,
@@ -343,16 +343,21 @@ def test(message):
                 questions_id_list.append(question[0])
 
             questions_id_list.pop(0)
-            # Создаем кнопки и callback message
-            callback_str = """{"key": "next_question", "q_l": """ + str(questions_id_list) + """}"""
-            keyboard = types.InlineKeyboardMarkup()
-            btn1 = types.InlineKeyboardButton(text='Да',
-                                              callback_data=callback_str)
-            keyboard.add(btn1)
+            if len(questions_id_list) > 0:
 
-            bot.send_message(message.chat.id,
-                             'Следующий вопрос?',
-                             reply_markup=keyboard)
+                # Создаем кнопки и callback message
+                callback_str = """{"key": "next_question", "q_l": """ + str(questions_id_list) + """}"""
+                keyboard = types.InlineKeyboardMarkup()
+                btn1 = types.InlineKeyboardButton(text='Да',
+                                                  callback_data=callback_str)
+                keyboard.add(btn1)
+
+                bot.send_message(message.chat.id,
+                                 'Следующий вопрос?',
+                                 reply_markup=keyboard)
+            else:
+                bot.send_message(message.chat.id,
+                                 'Тест завершен')
 
 
 # Функция создания викторины
@@ -399,7 +404,9 @@ def callback_worker(call):
 
     # Для кнопки перехода на следующий вопрос в тесте
     if callback['key'] == 'next_question':
+
         questions_id_list = list(callback['q_l'])
+
         question = database.get_word_by_id(questions_id_list[0])[0]
 
         created_poll(call.message.chat.id, question)
@@ -415,15 +422,15 @@ def callback_worker(call):
 
             keyboard = types.InlineKeyboardMarkup()
             btn1 = types.InlineKeyboardButton(text='Да',
-                                              callback_data=callback_str)
+                                                  callback_data=callback_str)
             keyboard.add(btn1)
 
             bot.send_message(call.message.chat.id,
-                             'Следующий вопрос?',
-                             reply_markup=keyboard)
+                                 'Следующий вопрос?',
+                                 reply_markup=keyboard)
         else:
             bot.send_message(call.message.chat.id,
-                             'Тест завершен')
+                                 'Тест завершен')
 
     # Кнопка для удаления слова
     elif callback['key'] == 'del_word_btn':
