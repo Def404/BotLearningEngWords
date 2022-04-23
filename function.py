@@ -11,13 +11,6 @@ def check_spelling_en(word):
     return check_result
 
 
-# Фун-ия проверки правописания на русском
-def check_spelling_ru(word):
-    dictionary = enchant.Dict('ru_Ru')
-    check_result = dictionary.check(word)
-    return check_result
-
-
 # Фун-ия перевода
 def google_translate_word(word):
     try:
@@ -42,19 +35,22 @@ def google_translate_word(word):
 def get_random_word(user_id):
     rnd_words_list = database.get_eng_words()
 
-    rnd_num = random.randint(0, len(rnd_words_list))
-    rnd_word = rnd_words_list[rnd_num][0]
+    rnd_word = get_rnd_word(rnd_words_list)
 
     # Проверка правописания полученного слова
     while not check_spelling_en(rnd_word):
-        rnd_num = random.randint(0, len(rnd_words_list))
-        rnd_word = rnd_words_list[rnd_num][0]
+        rnd_word = get_rnd_word(rnd_words_list)
 
     # Проверка, что полученное слово уже есть в словаре пользователя
     while database.check_repeat_word(user_id, rnd_word) > 0:
-        rnd_num = random.randint(0, len(rnd_words_list))
-        rnd_word = rnd_words_list[rnd_num][0]
+        rnd_word = get_rnd_word(rnd_words_list)
 
+    return rnd_word
+
+
+def get_rnd_word(words_list):
+    rnd_num = random.randint(0, len(words_list))
+    rnd_word = words_list[rnd_num][0]
     return rnd_word
 
 

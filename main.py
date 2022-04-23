@@ -12,11 +12,7 @@ bot = telebot.TeleBot(config.token)
 print('Start bot')
 
 
-# Команда [/start] при начале работы с ботом
-@bot.message_handler(commands=["start"])
-def start(message):
-    message_text = 'Привет, *' + str(message.chat.first_name) + '*!\n'
-    message_text += 'Данный бот позволит Вам изучить английские слова!\n\n' \
+text_info = 'Данный бот позволит Вам изучить английские слова!\n\n' \
                     'Вы сможете хранить все изученые слова в одном месте\n' \
                     'Пройти тест на знание изученных слов\n' \
                     'Переводить слова и фразы\n\n' \
@@ -32,6 +28,13 @@ def start(message):
                     '/deldictionary - очистить словарь\n' \
                     '/info | /help - информация о боте`\n\n' \
                     'Разработчик: @adef15'
+
+
+# Команда [/start] при начале работы с ботом
+@bot.message_handler(commands=["start"])
+def start(message):
+    message_text = 'Привет, *' + str(message.chat.first_name) + '*!\n'
+    message_text += text_info
     bot.send_message(message.chat.id,
                      message_text,
                      parse_mode="Markdown")
@@ -271,24 +274,8 @@ def translate(message):
 # Команда для отображения информации
 @bot.message_handler(commands=["info", "help"])
 def info(message):
-    message_text = 'Данный бот позволит Вам изучить английские слова!\n\n' \
-                   'Вы сможете хранить все изученые слова в одном месте\n' \
-                   'Пройти тест на знание изученных слов\n' \
-                   'Переводить слова и фразы\n\n' \
-                   '*Команды:*\n' \
-                   '`/new - изучить новое слово\n' \
-                   '/add [слово] - добавить слово в словарь\n' \
-                   '/add [слово] [слово] - добавить несколько слов в словарь\n' \
-                   '/dictionary - Ваш словарь\n' \
-                   '/test [количество вопросов] - пройти тест на изучение слов (максимум 10 вопросов)\n' \
-                   '/translate [слово/фраза] - перевод слов и фраз  ' \
-                   '(С английского на русский; С русского на английский)\n' \
-                   '/delword [слово] - удалить слово из словаря\n' \
-                   '/deldictionary - очистить словарь\n' \
-                   '/info | /help - информация о боте`\n\n' \
-                   'Разработчик: @adef15'
     bot.send_message(message.chat.id,
-                     message_text,
+                     text_info,
                      parse_mode="Markdown")
 
 
@@ -325,7 +312,7 @@ def test(message):
                              message_text,
                              parse_mode="Markdown")
 
-        elif num_question > 5:
+        elif 5 < num_question < 1:
             message_text = '*Тест может состоять максимум из 5 вопросов*'
 
             bot.send_message(message.chat.id,
@@ -342,22 +329,7 @@ def test(message):
             for question in questions_list:
                 questions_id_list.append(question[0])
 
-            questions_id_list.pop(0)
-            if len(questions_id_list) > 0:
-
-                # Создаем кнопки и callback message
-                callback_str = """{"key": "next_question", "q_l": """ + str(questions_id_list) + """}"""
-                keyboard = types.InlineKeyboardMarkup()
-                btn1 = types.InlineKeyboardButton(text='Да',
-                                                  callback_data=callback_str)
-                keyboard.add(btn1)
-
-                bot.send_message(message.chat.id,
-                                 'Следующий вопрос?',
-                                 reply_markup=keyboard)
-            else:
-                bot.send_message(message.chat.id,
-                                 'Тест завершен')
+            created_next_question_btn(message, questions_id_list)
 
 
 # Функция создания викторины
@@ -397,6 +369,26 @@ def my_poll(message):
         database.set_answer_word(user_id, question_word)
 
 
+def created_next_question_btn(message, questions_id_list):
+    if len(questions_id_list) > 1:
+
+        questions_id_list.pop(0)
+
+        callback_str = """{"key": "next_question", "q_l": """ + str(questions_id_list) + """}"""
+
+        keyboard = types.InlineKeyboardMarkup()
+        btn1 = types.InlineKeyboardButton(text='Да',
+                                          callback_data=callback_str)
+        keyboard.add(btn1)
+
+        bot.send_message(message.chat.id,
+                         'Следующий вопрос?',
+                         reply_markup=keyboard)
+    else:
+        bot.send_message(message.chat.id,
+                         'Тест завершен')
+
+
 # Обработчик кнопок
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
@@ -413,24 +405,7 @@ def callback_worker(call):
 
         # Удаляем предыдущую кнопку
         bot.delete_message(call.message.chat.id, call.message.message_id)
-
-        if len(questions_id_list) > 1:
-
-            questions_id_list.pop(0)
-
-            callback_str = """{"key": "next_question", "q_l": """ + str(questions_id_list) + """}"""
-
-            keyboard = types.InlineKeyboardMarkup()
-            btn1 = types.InlineKeyboardButton(text='Да',
-                                              callback_data=callback_str)
-            keyboard.add(btn1)
-
-            bot.send_message(call.message.chat.id,
-                             'Следующий вопрос?',
-                             reply_markup=keyboard)
-        else:
-            bot.send_message(call.message.chat.id,
-                             'Тест завершен')
+        created_next_question_btn(call.message, questions_id_list)
 
     # Кнопка для удаления слова
     elif callback['key'] == 'del_word_btn':
