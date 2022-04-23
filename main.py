@@ -277,7 +277,7 @@ def info(message):
                    'Переводить слова и фразы\n\n' \
                    '*Команды:*\n' \
                    '`/new - изучить новое слово\n' \
-                   '/add [слово] - добавть слово в словарь\n' \
+                   '/add [слово] - добавить слово в словарь\n' \
                    '/add [слово] [слово] - добавить несколько слов в словарь\n' \
                    '/dictionary - Ваш словарь\n' \
                    '/test [количество вопросов] - пройти тест на изучение слов (максимум 10 вопросов)\n' \
@@ -422,15 +422,15 @@ def callback_worker(call):
 
             keyboard = types.InlineKeyboardMarkup()
             btn1 = types.InlineKeyboardButton(text='Да',
-                                                  callback_data=callback_str)
+                                              callback_data=callback_str)
             keyboard.add(btn1)
 
             bot.send_message(call.message.chat.id,
-                                 'Следующий вопрос?',
-                                 reply_markup=keyboard)
+                             'Следующий вопрос?',
+                             reply_markup=keyboard)
         else:
             bot.send_message(call.message.chat.id,
-                                 'Тест завершен')
+                             'Тест завершен')
 
     # Кнопка для удаления слова
     elif callback['key'] == 'del_word_btn':
