@@ -11,9 +11,11 @@
 - очистка словаря (/deldictionary)
 
 Библиотеки 
-1) google translate - для перевода
-2) pyenchant - для проверки правописания слов 
+1) TelegramBotAPI - для бота (pip install pyTelegramBotAPI)
+2) google translate - для перевода (pip install googletrans)
+3) pyenchant - для проверки правописания слов (pip install pyenchant)
 
 БД SQLite
 1) eng_words_dictionary - таблица английский слов (для команды /new)
 2) user_dictionary - таблица для хранения изученных слов пользователями
+
