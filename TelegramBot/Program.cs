@@ -5,5 +5,3 @@ var configuration = new ConfigurationBuilder()
     .Build();
 
 var token = configuration["Token"];
-
-Console.WriteLine("Hello, World!");
