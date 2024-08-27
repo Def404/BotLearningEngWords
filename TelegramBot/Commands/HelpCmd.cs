@@ -1,7 +1,6 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using TelegramBot;
 
 namespace TelegramBot.Commands;
 
@@ -10,6 +9,7 @@ public class HelpCmd : ICommand
     public string Name => "Help";
     public string? Description => "Помощь";
     public string Command => "/help";
+    public int ParameterCount => 0;
 
     public async void Action(ITelegramBotClient botClient, Update update)
     {

@@ -8,8 +8,8 @@ public interface ICommand
     string Name { get; }
     string? Description { get; }
     string Command { get; }
-    /*string[]? ParameterKeys { get; }
-    int ParameterCount { get; }*/
+    //string[]? ParameterKeys { get; }
+    int ParameterCount { get; }
 
     public void Action(ITelegramBotClient botClient, Update update);
 }
