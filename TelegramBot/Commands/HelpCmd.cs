@@ -11,13 +11,26 @@ public class HelpCmd : ICommand
     public string Command => "/help";
     public int ParameterCount => 0;
 
-    public async void Action(ITelegramBotClient botClient, Update update)
+    public async void Action(ITelegramBotClient botClient, Message message)
     {
-        var massage = update.Message;
+        if (message.Text == null)
+            return;
 
-        if (massage is null) return;
+        var chat = message.Chat;
 
-        var chat = massage.Chat;
+        var parameters = message.Text
+               .Replace(this.Command, "")
+               .Trim()
+               .Split(' ');
+
+        if(parameters.Length > ParameterCount || parameters.Length < ParameterCount)
+        {
+            var errorMessage = $"\n{this.Description}";
+                await botClient.SendTextMessageAsync(chat.Id, $"{errorMessage}",
+                replyToMessageId: message.MessageId);
+
+                return;
+        };
 
         var text = "Данный бот позволит Вам изучить английские слова! \n\n" +
                    "Вы сможете хранить все изученые слова в одном месте\n" +

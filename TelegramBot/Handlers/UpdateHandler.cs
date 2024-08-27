@@ -18,7 +18,7 @@ public abstract class UpdateHandler : Handler
 
         foreach (var command in CommandsList.Commands.Where(command => cmd[0].Equals(command.Command)))
         {
-            command.Action(botClient, update);
+            command.Action(botClient, update.Message);
         }
         
         /*if (massage != null)
