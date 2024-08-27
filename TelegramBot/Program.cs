@@ -4,13 +4,13 @@ using NLog.Extensions.Logging;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot;
+using TelegramBot.Handlers;
 
 var configuration = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
 
 var logger = LoggerFactory.Create(builder => builder.AddNLog()).CreateLogger<Program>();
-
 
 var token = configuration["Token"];
 
@@ -33,7 +33,7 @@ var receiverOptions = new ReceiverOptions
 };
 using var cts = new CancellationTokenSource();
 
-//bot.StartReceiving(UpdateHandler.Invoke, ErrorHandler.Invoke, receiverOptions, cts.Token);
+bot.StartReceiving(UpdateHandler.Invoke, ErrorHandler.Invoke, receiverOptions, cts.Token);
 
 await bot.GetMeAsync();
 
