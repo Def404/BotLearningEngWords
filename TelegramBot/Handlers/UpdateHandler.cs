@@ -16,17 +16,17 @@ public abstract class UpdateHandler : Handler
 
         var cmd = massage.Text.Split(' ');
 
-        /*foreach (var command in CommandsList.Commands.Where(command => cmd[0].Equals(command.Command)))
+        foreach (var command in CommandsList.Commands.Where(command => cmd[0].Equals(command.Command)))
         {
             command.Action(botClient, update);
-        }*/
+        }
         
-        if (massage != null)
+        /*if (massage != null)
         {
             var user = massage.From;
             var chat = massage.Chat;
 
             await botClient.SendTextMessageAsync(chat.Id, massage.Text);
-        }
+        }*/
     }
 }
