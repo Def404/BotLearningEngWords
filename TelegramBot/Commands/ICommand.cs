@@ -7,7 +7,8 @@ public interface ICommand
 {
     string Name { get; }
     string? Description { get; }
-    string Command { get; }
+    string CommandTag { get; }
+    string CommandInfo { get; }
     int ParameterCount { get; }
 
     public void Action(ITelegramBotClient botClient, Message message);

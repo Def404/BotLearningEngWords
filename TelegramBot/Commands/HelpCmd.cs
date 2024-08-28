@@ -8,7 +8,7 @@ public class HelpCmd : ICommand
 {
     public string Name => "Help";
     public string? Description => "Помощь";
-    public string Command => "/help";
+    public string CommandTag => "/help";
     public int ParameterCount => 0;
 
     public async void Action(ITelegramBotClient botClient, Message message)
@@ -19,7 +19,7 @@ public class HelpCmd : ICommand
         var chat = message.Chat;
 
         var parameters = message.Text
-               .Replace(this.Command, "")
+               .Replace(this.CommandTag, "")
                .Trim()
                .Split(' ');
 
@@ -41,7 +41,7 @@ public class HelpCmd : ICommand
 
         foreach (var command in CommandsList.Commands)
         {
-            text += $"{command.Command} - {command.Description}\n";
+            text += $"{command.CommandTag} - {command.Description}\n";
         }
 
         text += "`\n\n" +

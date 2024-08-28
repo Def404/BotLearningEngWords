@@ -16,7 +16,7 @@ public abstract class UpdateHandler : Handler
 
         var cmd = massage.Text.Split(' ');
 
-        foreach (var command in CommandsList.Commands.Where(command => cmd[0].Equals(command.Command)))
+        foreach (var command in CommandsList.Commands.Where(command => cmd[0].Equals(command.CommandTag)))
         {
             command.Action(botClient, update.Message);
         }
