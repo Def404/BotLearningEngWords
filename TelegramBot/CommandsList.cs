@@ -2,7 +2,7 @@
 
 namespace TelegramBot;
 
-public class CommandsList
+public static class CommandsList
 {
-    public static readonly List<ICommand> Commands = [new HelpCmd(), new HelloCmd(), new TestCmd()];
+    public static readonly List<ICommand> Commands = [new HelpCmd(), new HelloCmd()];
 }
