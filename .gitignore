@@ -1,4 +1,6 @@
-.idea/
-bin/
-obj/
-.vs/
+.vs
+*/.idea
+TelegramBot/.idea
+TelegramBot/.vs
+TelegramBot/bin
+TelegramBot/obj
