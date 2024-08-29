@@ -11,5 +11,14 @@
 
             return parameters;
         }
+
+        public static string GetParameterForTranslate(string messageText, string command)
+        {
+            var parameter = messageText
+                .Replace(command, "")
+                .Trim();
+
+            return parameter;
+        }
     }
 }
