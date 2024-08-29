@@ -14,7 +14,7 @@ var logger = LoggerFactory.Create(builder => builder.AddNLog()).CreateLogger<Pro
 
 var token = configuration["Token"];
 
-if(token == null)
+if (token == null)
 {
     logger.LogError("Token not found!");
     return;

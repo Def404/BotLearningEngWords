@@ -8,10 +8,9 @@ public abstract class UpdateHandler : Handler
     public static async Task Invoke(ITelegramBotClient botClient, Update update,
         CancellationToken cancellationToken)
     {
-        
-        if(update.Message is null) return;
-        if(update.Message.Text is null) return;
-        
+        if (update.Message is null) return;
+        if (update.Message.Text is null) return;
+
         var massage = update.Message;
 
         var cmd = massage.Text.Split(' ');
@@ -20,7 +19,7 @@ public abstract class UpdateHandler : Handler
         {
             command.Action(botClient, update.Message);
         }
-        
+
         /*if (massage != null)
         {
             var user = massage.From;

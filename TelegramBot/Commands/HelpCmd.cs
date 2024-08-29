@@ -7,7 +7,7 @@ namespace TelegramBot.Commands;
 public class HelpCmd : ICommand
 {
     public string Name => "Help";
-    public string? Description => "Помощь";
+    public string Description => "Помощь";
     public string CommandTag => "/help";
     public string CommandInfo => "/help";
     public int ParameterCount => 0;

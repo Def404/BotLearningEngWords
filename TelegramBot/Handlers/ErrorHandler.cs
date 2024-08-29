@@ -8,14 +8,14 @@ public abstract class ErrorHandler : Handler
 {
     public static Task Invoke(ITelegramBotClient botClient, Exception error, CancellationToken cancellationToken)
     {
-        var ErrorMessage = error switch
+        var errorMessage = error switch
         {
             ApiRequestException apiRequestException
                 => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
             _ => error.ToString()
         };
 
-        MyLogger.LogError(ErrorMessage);
+        MyLogger.LogError(errorMessage);
 
         return Task.CompletedTask;
     }
