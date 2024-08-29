@@ -9,6 +9,8 @@
                 .Trim()
                 .Split(' ');
 
+            parameters = parameters.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+
             return parameters;
         }
 

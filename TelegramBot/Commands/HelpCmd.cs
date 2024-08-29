@@ -28,6 +28,8 @@ public class HelpCmd : ICommand
             await botClient.SendTextMessageAsync(chat.Id, errorText,
                 parseMode: ParseMode.Markdown,
                 protectContent: true);
+            
+            return;
         }
 
 

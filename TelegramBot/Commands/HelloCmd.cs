@@ -33,6 +33,8 @@ public class HelloCmd : ICommand
             await botClient.SendTextMessageAsync(chat.Id, errorText,
                 parseMode: ParseMode.Markdown,
                 protectContent: true);
+            
+            return;
         }
 
         await botClient.SendTextMessageAsync(chat.Id, $"Привет, {user.FirstName}!",
