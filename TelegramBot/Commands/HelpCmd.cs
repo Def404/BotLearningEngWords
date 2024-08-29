@@ -9,28 +9,27 @@ public class HelpCmd : ICommand
     public string Name => "Help";
     public string? Description => "Помощь";
     public string CommandTag => "/help";
+    public string CommandInfo => "/help";
     public int ParameterCount => 0;
 
     public async void Action(ITelegramBotClient botClient, Message message)
     {
-        if (message.Text == null)
+        if (message.Text is null)
             return;
 
         var chat = message.Chat;
 
-        var parameters = message.Text
-               .Replace(this.CommandTag, "")
-               .Trim()
-               .Split(' ');
+        var parameters = CommandService.GetParameters(message.Text, this.CommandTag);
 
-        if(parameters.Length > ParameterCount || parameters.Length < ParameterCount)
+        if (parameters.Length != this.ParameterCount)
         {
-            var errorMessage = $"\n{this.Description}";
-                await botClient.SendTextMessageAsync(chat.Id, $"{errorMessage}",
-                replyToMessageId: message.MessageId);
+            var errorText = $"Команла введена не правильно:\n\n`{this.CommandInfo}`";
 
-                return;
-        };
+            await botClient.SendTextMessageAsync(chat.Id, errorText,
+                parseMode: ParseMode.Markdown,
+                protectContent: true);
+        }
+
 
         var text = "Данный бот позволит Вам изучить английские слова! \n\n" +
                    "Вы сможете хранить все изученые слова в одном месте\n" +
