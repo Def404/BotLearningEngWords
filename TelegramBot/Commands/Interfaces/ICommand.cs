@@ -11,5 +11,5 @@ public interface ICommand
     string CommandInfo { get; }
     int ParameterCount { get; }
 
-    public void Action(ITelegramBotClient botClient, Message message);
+    public Task Action(ITelegramBotClient botClient, Message message);
 }

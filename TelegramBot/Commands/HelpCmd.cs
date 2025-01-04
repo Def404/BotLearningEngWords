@@ -1,6 +1,7 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 using TelegramBot.Commands.Helpers;
 using TelegramBot.Commands.Interfaces;
 
@@ -14,7 +15,7 @@ public class HelpCmd : ICommand
     public string CommandInfo => "/help";
     public int ParameterCount => 0;
 
-    public async void Action(ITelegramBotClient botClient, Message message)
+    public async Task Action(ITelegramBotClient botClient, Message message)
     {
         if (message.Text is null)
             return;
@@ -27,31 +28,36 @@ public class HelpCmd : ICommand
         {
             var errorText = $"Команла введена не правильно:\n\n`{this.CommandInfo}`";
 
-            await botClient.SendTextMessageAsync(chat.Id, errorText,
+            await botClient.SendMessage(chat.Id, errorText,
                 parseMode: ParseMode.Markdown,
                 protectContent: true);
-            
+
             return;
         }
 
+        var newText = """
+            Данный бот позволит Вам изучить английские слова!
 
-        var text = "Данный бот позволит Вам изучить английские слова! \n\n" +
-                   "Вы сможете хранить все изученые слова в одном месте\n" +
-                   "Пройти тест на знание изученных слов\n" +
-                   "Переводить слова и фразы\n\n" +
-                   "*Команды:*\n" +
-                   "`";
+            Вы сможете хранить все изученые слова в одном месте
+            Пройти тест на знание изученных слов
+            Переводить слова и фразы
+
+            <b><u>Команды</u></b>:
+
+            """;
 
         foreach (var command in CommandsList.Commands)
         {
-            text += $"{command.CommandTag} - {command.Description}\n";
+            newText += $"{command.CommandTag} - {command.Description}\n";
         }
 
-        text += "`\n\n" +
-                "Разработчик: @adef15";
+        newText += """
 
-        await botClient.SendTextMessageAsync(chat.Id, text,
-            parseMode: ParseMode.Markdown,
-            protectContent: true);
+            Разработчик: @adef15
+            """;
+
+        await botClient.SendMessage(chat.Id, newText,
+            parseMode: ParseMode.Html, linkPreviewOptions: true,
+            replyMarkup: new ReplyKeyboardRemove());
     }
 }

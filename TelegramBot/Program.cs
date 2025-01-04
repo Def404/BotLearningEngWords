@@ -1,43 +1,28 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
-using Telegram.Bot.Polling;
-using Telegram.Bot.Types.Enums;
 using Telegram.Bot;
 using TelegramBot.Handlers;
 
-var configuration = new ConfigurationBuilder()
-    .AddUserSecrets<Program>()
-    .Build();
-
-var logger = LoggerFactory.Create(builder => builder.AddNLog()).CreateLogger<Program>();
-
-var token = configuration["Token"];
-
-if (token == null)
+internal class Program
 {
-    logger.LogError("Token not found!");
-    return;
-}
-
-var bot = new TelegramBotClient(token);
-
-var receiverOptions = new ReceiverOptions
-{
-    AllowedUpdates = new[]
+    private static async Task Main(string[] args)
     {
-        UpdateType.Message,
-        UpdateType.CallbackQuery
-    },
-    ThrowPendingUpdates = true
-};
-using var cts = new CancellationTokenSource();
+        var token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN") ?? "";
 
-bot.StartReceiving(UpdateHandler.Invoke, ErrorHandler.Invoke, receiverOptions, cts.Token);
+        using var cts = new CancellationTokenSource();
+        var bot = new TelegramBotClient(token, cancellationToken: cts.Token);
 
-await bot.GetMeAsync();
+        var me = await bot.GetMe();
+        await bot.DeleteWebhook();
+        await bot.DropPendingUpdates();
 
-logger.LogInformation("Bot started");
+        TelegramHandlers telegramHandlers = new TelegramHandlers(cts, bot, me);
 
-await Task.Delay(-1);
+        bot.OnError += telegramHandlers.OnError;
+        bot.OnMessage += telegramHandlers.OnMessage;
+        bot.OnUpdate += telegramHandlers.OnUpdate;
+
+        Console.WriteLine($"@{me.Username} is running... Press Escape to terminate");
+        while (Console.ReadKey(true).Key != ConsoleKey.Escape) ;
+        cts.Cancel();
+    }
+}

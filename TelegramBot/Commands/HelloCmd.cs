@@ -14,7 +14,7 @@ public class HelloCmd : ICommand
     public string CommandInfo => "/hi";
     public int ParameterCount => 0;
 
-    public async void Action(ITelegramBotClient botClient, Message message)
+    public async Task Action(ITelegramBotClient botClient, Message message)
     {
         var user = message.From;
         
@@ -32,14 +32,14 @@ public class HelloCmd : ICommand
         {
             var errorText = $"Команла введена не правильно:\n\n`{this.CommandInfo}`";
 
-            await botClient.SendTextMessageAsync(chat.Id, errorText,
+            await botClient.SendMessage(chat.Id, errorText,
                 parseMode: ParseMode.Markdown,
                 protectContent: true);
             
             return;
         }
 
-        await botClient.SendTextMessageAsync(chat.Id, $"Привет, {user.FirstName}!",
-            replyToMessageId: message.MessageId);
+        await botClient.SendMessage(chat.Id, $"Привет, {user.FirstName}!",
+            replyParameters: message.MessageId);
     }
 }

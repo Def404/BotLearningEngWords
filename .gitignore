@@ -1,6 +1,9 @@
 .vs
-*/.idea
+.idea
+.env
+
 TelegramBot/.idea
 TelegramBot/.vs
 TelegramBot/bin
 TelegramBot/obj
+TelegramBot/Properties
