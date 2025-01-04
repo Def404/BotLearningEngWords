@@ -6,6 +6,8 @@ using NLog.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using TelegramBot.Commands.Helpers;
+using TelegramBot.Commands.Interfaces;
 using TelegramBot.Models;
 
 namespace TelegramBot.Commands;
@@ -42,7 +44,7 @@ public class TranslateCmd : ICommand
 
         var chat = message.Chat;
 
-        var parameter = CommandService.GetParameterForTranslate(message.Text, this.CommandTag);
+        var parameter = CommandHelpers.GetParameterForTranslate(message.Text, this.CommandTag);
 
         if (string.IsNullOrEmpty(parameter))
         {
