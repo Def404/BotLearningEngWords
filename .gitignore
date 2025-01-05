@@ -7,3 +7,6 @@ TelegramBot/.vs
 TelegramBot/bin
 TelegramBot/obj
 TelegramBot/Properties
+
+DatabaseClassLibrary/bin
+DatabaseClassLibrary/obj
