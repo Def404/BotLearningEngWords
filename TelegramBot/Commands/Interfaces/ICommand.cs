@@ -1,7 +1,7 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace TelegramBot.Commands;
+namespace TelegramBot.Commands.Interfaces;
 
 public interface ICommand
 {
@@ -11,5 +11,5 @@ public interface ICommand
     string CommandInfo { get; }
     int ParameterCount { get; }
 
-    public void Action(ITelegramBotClient botClient, Message message);
+    public Task Action(ITelegramBotClient botClient, Message message);
 }

@@ -1,6 +1,6 @@
-﻿namespace TelegramBot.Commands
+﻿namespace TelegramBot.Commands.Helpers
 {
-    internal static class CommandService
+    internal static class CommandHelpers
     {
         public static string[] GetParameters(string messageText, string command)
         {
