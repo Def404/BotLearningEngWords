@@ -10,3 +10,7 @@ TelegramBot/Properties
 
 DatabaseClassLibrary/bin
 DatabaseClassLibrary/obj
+
+WebApi/bin
+WebApi/obj
+WebApi/Properties
