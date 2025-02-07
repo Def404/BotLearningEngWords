@@ -1,7 +1,10 @@
-﻿using Telegram.Bot;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using TelegramBot.Commands.Interfaces;
+using TelegramBot.Services;
 
 namespace TelegramBot.Handlers
 {
@@ -10,12 +13,14 @@ namespace TelegramBot.Handlers
         private readonly CancellationTokenSource _cts;
         private readonly TelegramBotClient _bot;
         private readonly User _me;
+        private readonly IServiceProvider _services;
 
-        public TelegramHandlers(CancellationTokenSource cts, TelegramBotClient bot, User me)
+        public TelegramHandlers(CancellationTokenSource cts, TelegramBotClient bot, User me, IServiceProvider services)
         {
             _cts = cts;
             _bot = bot;
             _me = me;
+            _services = services;
         }
 
         public async Task OnError(Exception exception, HandleErrorSource source)
@@ -53,66 +58,41 @@ namespace TelegramBot.Handlers
         async Task OnCommand(string command, string args, Message msg)
         {
             Console.WriteLine($"Received command: {command} {args}");
-
-            foreach (var myCommand in CommandsList.Commands.Where(c => command.Equals(c.CommandTag)))
+            try
             {
-                await myCommand.Action(_bot, msg);
-            }
+                var userService = _services.GetRequiredService<UserServices>();
+                var tgUser = msg.From;
 
-            /*switch (command)
-            {
-                case "/start":
-                    await _bot.SendMessage(msg.Chat, """
-                <b><u>Bot menu</u></b>:
-                /photo [url]    - send a photo <i>(optionally from an <a href="https://picsum.photos/310/200.jpg">url</a>)</i>
-                /inline_buttons - send inline buttons
-                /keyboard       - send keyboard buttons
-                /remove         - remove keyboard buttons
-                /poll           - send a poll
-                /reaction       - send a reaction
-                """, parseMode: ParseMode.Html, linkPreviewOptions: true,
-                        replyMarkup: new ReplyKeyboardRemove()); // also remove keyboard to clean-up things
-                    break;
-                case "/help":
-                    var c = CommandsList.Commands.Find(i => i.CommandTag == "/help");
-                    await c.Action(_bot, msg);
-                   
-                    break;
-                case "/photo":
-                    if (args.StartsWith("http"))
-                        await _bot.SendPhoto(msg.Chat, args, caption: "Source: " + args);
+                if (tgUser == null)
+                {
+                    await _bot.SendMessage(msg.Chat, "Ошибка пользователя");
+                }
+                else
+                {
+                    var initUser = await userService.InitUser(tgUser);
+
+                    if (initUser)
+                    {
+                        await _bot.SendMessage(msg.Chat, $"Вы успешно зарегистрировались в системе!");
+                    }
+
+                    var commands = _services.GetServices<ICommand>();
+                    var myCommand = commands.FirstOrDefault(i => i.CommandTag.Equals(command));
+                    if (myCommand is not null)
+                    {
+                        await myCommand.Action(_bot, msg);
+                    }
                     else
                     {
-                        await _bot.SendChatAction(msg.Chat, ChatAction.UploadPhoto);
-                        await Task.Delay(2000); // simulate a long task
-                        await using var fileStream = new FileStream("bot.gif", FileMode.Open, FileAccess.Read);
-                        await _bot.SendPhoto(msg.Chat, fileStream, caption: "Read https://telegrambots.github.io/book/");
+                        await _bot.SendMessage(msg.Chat, "Команда не найдена");
                     }
-                    break;
-                case "/inline_buttons":
-                    var inlineMarkup = new InlineKeyboardMarkup()
-                        .AddNewRow("1.1", "1.2", "1.3")
-                        .AddNewRow()
-                            .AddButton("WithCallbackData", "CallbackData")
-                            .AddButton(InlineKeyboardButton.WithUrl("WithUrl", "https://github.com/TelegramBots/Telegram.Bot"));
-                    await _bot.SendMessage(msg.Chat, "Inline buttons:", replyMarkup: inlineMarkup);
-                    break;
-                case "/keyboard":
-                    var replyMarkup = new ReplyKeyboardMarkup()
-                        .AddNewRow("1.1", "1.2", "1.3")
-                        .AddNewRow().AddButton("2.1").AddButton("2.2");
-                    await _bot.SendMessage(msg.Chat, "Keyboard buttons:", replyMarkup: replyMarkup);
-                    break;
-                case "/remove":
-                    await _bot.SendMessage(msg.Chat, "Removing keyboard", replyMarkup: new ReplyKeyboardRemove());
-                    break;
-                case "/poll":
-                    await _bot.SendPoll(msg.Chat, "Question", ["Option 0", "Option 1", "Option 2"], isAnonymous: false, allowsMultipleAnswers: true);
-                    break;
-                case "/reaction":
-                    await _bot.SetMessageReaction(msg.Chat, msg.Id, ["❤"], false);
-                    break;
-            }*/
+                }
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
+            }
         }
 
         public async Task OnUpdate(Update update)

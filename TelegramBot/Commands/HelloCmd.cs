@@ -17,10 +17,10 @@ public class HelloCmd : ICommand
     public async Task Action(ITelegramBotClient botClient, Message message)
     {
         var user = message.From;
-        
-        if(user == null)
+
+        if (user == null)
             return;
-        
+
         var chat = message.Chat;
 
         if (message.Text is null)
@@ -35,7 +35,7 @@ public class HelloCmd : ICommand
             await botClient.SendMessage(chat.Id, errorText,
                 parseMode: ParseMode.Markdown,
                 protectContent: true);
-            
+
             return;
         }
 

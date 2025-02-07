@@ -1,4 +1,5 @@
-﻿using Telegram.Bot;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -9,6 +10,13 @@ namespace TelegramBot.Commands;
 
 public class HelpCmd : ICommand
 {
+    private readonly IServiceProvider _serviceProvider;
+
+    public HelpCmd(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
     public string Name => "Help";
     public string Description => "Помощь";
     public string CommandTag => "/help";
@@ -46,7 +54,8 @@ public class HelpCmd : ICommand
 
             """;
 
-        foreach (var command in CommandsList.Commands)
+        var commands = _serviceProvider.GetServices<ICommand>();
+        foreach (var command in commands)
         {
             newText += $"{command.CommandTag} - {command.Description}\n";
         }
