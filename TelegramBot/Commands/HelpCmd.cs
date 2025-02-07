@@ -32,18 +32,9 @@ public class HelpCmd : ICommand
 
         var parameters = CommandHelpers.GetParameters(message.Text, this.CommandTag);
 
-        if (parameters.Length != this.ParameterCount)
-        {
-            var errorText = $"Команла введена не правильно:\n\n`{this.CommandInfo}`";
-
-            await botClient.SendMessage(chat.Id, errorText,
-                parseMode: ParseMode.Markdown,
-                protectContent: true);
-
-            return;
-        }
-
         var newText = """
+            <b>Информация</b>
+
             Данный бот позволит Вам изучить английские слова!
 
             Вы сможете хранить все изученые слова в одном месте

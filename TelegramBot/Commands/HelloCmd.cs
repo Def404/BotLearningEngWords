@@ -28,17 +28,6 @@ public class HelloCmd : ICommand
 
         var parameters = CommandHelpers.GetParameters(message.Text, this.CommandTag);
 
-        if (parameters.Length != this.ParameterCount)
-        {
-            var errorText = $"Команла введена не правильно:\n\n`{this.CommandInfo}`";
-
-            await botClient.SendMessage(chat.Id, errorText,
-                parseMode: ParseMode.Markdown,
-                protectContent: true);
-
-            return;
-        }
-
         await botClient.SendMessage(chat.Id, $"Привет, {user.FirstName}!",
             replyParameters: message.MessageId);
     }

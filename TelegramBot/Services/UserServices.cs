@@ -34,5 +34,12 @@ namespace TelegramBot.Services
 
             return false;
         }
+
+        public async Task<bool> HasUserAsync(User tgUser)
+        {
+            var userInDb = await _context.users.FirstOrDefaultAsync(i => i.telegram_user_id == tgUser.Id);
+
+            return userInDb != null;
+        }
     }
 }

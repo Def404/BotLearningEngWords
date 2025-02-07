@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using DatabaseClassLibrary.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -55,47 +57,47 @@ namespace TelegramBot.Handlers
 
         async Task OnTextMessage(Message msg)
         {
-            _logger.LogInformation($"Received text '{msg.Text}' in {msg.Chat}");
-            await OnCommand("/start", "", msg); // for now we redirect to command /start
+            await OnCommand("/help", "", msg); // for now we redirect to command /start
         }
 
         async Task OnCommand(string command, string args, Message msg)
         {
-            _logger.LogInformation($"Received command: {command} {args}");
+            //_logger.LogInformation($"Received command: {command} {args}");
 
             try
             {
-                var userService = _services.GetRequiredService<UserServices>();
                 var tgUser = msg.From;
 
-                if (tgUser == null)
+                if (tgUser != null)
                 {
-                    await _bot.SendMessage(msg.Chat, "Ошибка пользователя");
-                }
-                else
-                {
-                    var initUser = await userService.InitUser(tgUser);
+                    var userService = _services.GetRequiredService<UserServices>();
 
-                    if (initUser)
+                    if (await userService.HasUserAsync(tgUser) || command.Equals("/start"))
                     {
-                        await _bot.SendMessage(msg.Chat, $"Вы успешно зарегистрировались в системе!");
-                    }
-
-                    var commands = _services.GetServices<ICommand>();
-                    var myCommand = commands.FirstOrDefault(i => i.CommandTag.Equals(command));
-                    if (myCommand is not null)
-                    {
-                        await myCommand.Action(_bot, msg);
+                        var commands = _services.GetServices<ICommand>();
+                        var myCommand = commands.FirstOrDefault(i => i.CommandTag.Equals(command));
+                        if (myCommand != null)
+                        {
+                            await myCommand.Action(_bot, msg);
+                        }
+                        else
+                        {
+                            await _bot.SendMessage(msg.Chat, "Команда не найдена", replyParameters: msg.MessageId);
+                            await OnCommand("/help", "", msg);
+                        }
                     }
                     else
                     {
-                        await _bot.SendMessage(msg.Chat, "Команда не найдена");
+                        await _bot.SendMessage(msg.Chat, "Команда не доступна.\n\nВыполните команду - /start", replyParameters: msg.MessageId);
                     }
+                }
+                else
+                {
+                    _logger.LogError("Telegram user id not exist");
                 }
             }
             catch (Exception ex)
             {
-
                 _logger.LogError(ex.Message);
             }
         }
