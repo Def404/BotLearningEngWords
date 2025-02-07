@@ -5,6 +5,17 @@ VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelegramBot", "TelegramBot\TelegramBot.csproj", "{7D030F87-3E11-4EC2-B006-CEE7B5CCABC4}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseClassLibrary", "DatabaseClassLibrary\DatabaseClassLibrary.csproj", "{D161B789-3C82-4420-BA37-11625D7C9ED9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "WebApi\WebApi.csproj", "{2CE34460-1EB5-4321-B8EC-53C05471CB01}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{F719D648-87F6-463E-95F4-3ED5885F40D1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{D2452A96-8D61-4964-8603-5AAAB08F9042}"
+	ProjectSection(SolutionItems) = preProject
+		dotnet.yml = dotnet.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +26,20 @@ Global
 		{7D030F87-3E11-4EC2-B006-CEE7B5CCABC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D030F87-3E11-4EC2-B006-CEE7B5CCABC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D030F87-3E11-4EC2-B006-CEE7B5CCABC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D161B789-3C82-4420-BA37-11625D7C9ED9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D161B789-3C82-4420-BA37-11625D7C9ED9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D161B789-3C82-4420-BA37-11625D7C9ED9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D161B789-3C82-4420-BA37-11625D7C9ED9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CE34460-1EB5-4321-B8EC-53C05471CB01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CE34460-1EB5-4321-B8EC-53C05471CB01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CE34460-1EB5-4321-B8EC-53C05471CB01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CE34460-1EB5-4321-B8EC-53C05471CB01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D2452A96-8D61-4964-8603-5AAAB08F9042} = {F719D648-87F6-463E-95F4-3ED5885F40D1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B0D6440C-333A-4C33-BB27-16E059EE8338}

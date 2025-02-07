@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
-using TelegramBot.Commands;
+﻿using TelegramBot.Commands;
+using TelegramBot.Commands.Interfaces;
 
 namespace TelegramBot;
 

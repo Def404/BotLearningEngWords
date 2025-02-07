@@ -1,6 +1,8 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using TelegramBot.Commands.Helpers;
+using TelegramBot.Commands.Interfaces;
 
 namespace TelegramBot.Commands;
 
@@ -12,7 +14,7 @@ public class HelloCmd : ICommand
     public string CommandInfo => "/hi";
     public int ParameterCount => 0;
 
-    public async void Action(ITelegramBotClient botClient, Message message)
+    public async Task Action(ITelegramBotClient botClient, Message message)
     {
         var user = message.From;
         
@@ -24,20 +26,20 @@ public class HelloCmd : ICommand
         if (message.Text is null)
             return;
 
-        var parameters = CommandService.GetParameters(message.Text, this.CommandTag);
+        var parameters = CommandHelpers.GetParameters(message.Text, this.CommandTag);
 
         if (parameters.Length != this.ParameterCount)
         {
             var errorText = $"Команла введена не правильно:\n\n`{this.CommandInfo}`";
 
-            await botClient.SendTextMessageAsync(chat.Id, errorText,
+            await botClient.SendMessage(chat.Id, errorText,
                 parseMode: ParseMode.Markdown,
                 protectContent: true);
             
             return;
         }
 
-        await botClient.SendTextMessageAsync(chat.Id, $"Привет, {user.FirstName}!",
-            replyToMessageId: message.MessageId);
+        await botClient.SendMessage(chat.Id, $"Привет, {user.FirstName}!",
+            replyParameters: message.MessageId);
     }
 }
