@@ -20,7 +20,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      working-directory: ./TelegramBot
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
