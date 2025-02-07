@@ -36,6 +36,12 @@ internal class Program
             {
                 var token = Environment.GetEnvironmentVariable("TELEGRAM_BOT_TOKEN") ?? "";
 
+                if (string.IsNullOrEmpty(token))
+                {
+                    logger.LogError("No token provided");
+                    return;
+                }
+
                 using var cts = new CancellationTokenSource();
                 var bot = new TelegramBotClient(token, cancellationToken: cts.Token);
 
