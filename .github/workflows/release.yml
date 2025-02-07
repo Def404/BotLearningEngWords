@@ -5,7 +5,7 @@ on:
     types:
       - closed
     branches:
-      - master  # или ваша основная ветка, например, master
+      - master
 
 jobs:
   create-release:
@@ -22,20 +22,22 @@ jobs:
         id: extract_version
         run: |
           pr_title="${{ github.event.pull_request.title }}"
+          pr_body="${{ github.event.pull_request.body }}"
           echo "PR Title: $pr_title"
+          echo "PR Description: $pr_body"
           # Ищем в названии PR шаблон "Release vX.Y.Z"
           if [[ "$pr_title" =~ ^Release\ v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
             version="${BASH_REMATCH[1]}"
             echo "Version found: $version"
             echo "VERSION=$version" >> $GITHUB_ENV
+            echo "DESCRIPTION=$pr_body" >> $GITHUB_ENV
           else
             echo "No valid version found in PR title."
             exit 0  # Если версия не найдена, не продолжаем
-          fi
 
       - name: Create a Release
         if: env.VERSION != ''
         run: |
           git tag ${{ env.VERSION }}
           git push origin ${{ env.VERSION }}
-          gh release create ${{ env.VERSION }} --title "Release ${{ env.VERSION }}" --notes "Automatic release from PR title."
+          gh release create ${{ env.VERSION }} --title "Release ${{ env.VERSION }}" --notes "${{ env.DESCRIPTION }}"
