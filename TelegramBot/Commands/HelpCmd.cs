@@ -1,4 +1,5 @@
-﻿using Telegram.Bot;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -9,6 +10,13 @@ namespace TelegramBot.Commands;
 
 public class HelpCmd : ICommand
 {
+    private readonly IServiceProvider _serviceProvider;
+
+    public HelpCmd(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
     public string Name => "Help";
     public string Description => "Помощь";
     public string CommandTag => "/help";
@@ -24,18 +32,9 @@ public class HelpCmd : ICommand
 
         var parameters = CommandHelpers.GetParameters(message.Text, this.CommandTag);
 
-        if (parameters.Length != this.ParameterCount)
-        {
-            var errorText = $"Команла введена не правильно:\n\n`{this.CommandInfo}`";
-
-            await botClient.SendMessage(chat.Id, errorText,
-                parseMode: ParseMode.Markdown,
-                protectContent: true);
-
-            return;
-        }
-
         var newText = """
+            <b>Информация</b>
+
             Данный бот позволит Вам изучить английские слова!
 
             Вы сможете хранить все изученые слова в одном месте
@@ -46,7 +45,8 @@ public class HelpCmd : ICommand
 
             """;
 
-        foreach (var command in CommandsList.Commands)
+        var commands = _serviceProvider.GetServices<ICommand>();
+        foreach (var command in commands)
         {
             newText += $"{command.CommandTag} - {command.Description}\n";
         }

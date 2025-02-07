@@ -25,6 +25,10 @@
     <PackageReference Include="Telegram.Bot" Version="22.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DatabaseClassLibrary\DatabaseClassLibrary.csproj" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<None Update="nlog.config" CopyToOutputDirectory="Always" />
 	</ItemGroup>

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -6,11 +7,19 @@ using Telegram.Bot.Types.Enums;
 using TelegramBot.Commands.Helpers;
 using TelegramBot.Commands.Interfaces;
 using TelegramBot.Models;
+using TelegramBot.Services;
 
 namespace TelegramBot.Commands;
 
 public class TranslateCmd : ICommand
 {
+    private readonly ILogger<TranslateCmd> _logger;
+
+    public TranslateCmd(UserServices services, ILogger<TranslateCmd> logger)
+    {
+        _logger = logger;
+    }
+
     public string Name => "Translate";
     public string? Description => "Перевод текста RUS => ENG || ENG => RUS";
     public string CommandTag => "/translate";
@@ -24,7 +33,7 @@ public class TranslateCmd : ICommand
 
         if (String.IsNullOrEmpty(folderId) || String.IsNullOrEmpty(iamToken))
         {
-            Console.WriteLine("No folder id or iam token provided");
+            _logger.LogError("No folder id or iam token provided");
             return;
         }
 
@@ -59,6 +68,7 @@ public class TranslateCmd : ICommand
 
         if (detectResponse.StatusCode != System.Net.HttpStatusCode.OK)
         {
+            _logger.LogError($"Detect response status code: {detectResponse.StatusCode}");
             return;
         }
 
@@ -107,6 +117,7 @@ public class TranslateCmd : ICommand
 
         if (translateResponse.StatusCode != System.Net.HttpStatusCode.OK)
         {
+            _logger.LogError($"Translate response status code: {translateResponse.StatusCode}");
             return;
         }
 

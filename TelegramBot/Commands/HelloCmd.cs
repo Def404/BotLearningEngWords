@@ -17,27 +17,16 @@ public class HelloCmd : ICommand
     public async Task Action(ITelegramBotClient botClient, Message message)
     {
         var user = message.From;
-        
-        if(user == null)
+
+        if (user == null)
             return;
-        
+
         var chat = message.Chat;
 
         if (message.Text is null)
             return;
 
         var parameters = CommandHelpers.GetParameters(message.Text, this.CommandTag);
-
-        if (parameters.Length != this.ParameterCount)
-        {
-            var errorText = $"Команла введена не правильно:\n\n`{this.CommandInfo}`";
-
-            await botClient.SendMessage(chat.Id, errorText,
-                parseMode: ParseMode.Markdown,
-                protectContent: true);
-            
-            return;
-        }
 
         await botClient.SendMessage(chat.Id, $"Привет, {user.FirstName}!",
             replyParameters: message.MessageId);
