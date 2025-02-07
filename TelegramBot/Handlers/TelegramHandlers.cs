@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -14,6 +15,7 @@ namespace TelegramBot.Handlers
         private readonly TelegramBotClient _bot;
         private readonly User _me;
         private readonly IServiceProvider _services;
+        private readonly ILogger _logger;
 
         public TelegramHandlers(CancellationTokenSource cts, TelegramBotClient bot, User me, IServiceProvider services)
         {
@@ -21,18 +23,20 @@ namespace TelegramBot.Handlers
             _bot = bot;
             _me = me;
             _services = services;
+            _logger = services.GetRequiredService<ILogger<TelegramHandlers>>();
         }
 
         public async Task OnError(Exception exception, HandleErrorSource source)
         {
-            Console.WriteLine(exception);
+            _logger.LogError(exception, $"Error from {source}");
+
             await Task.Delay(2000, _cts.Token);
         }
 
         public async Task OnMessage(Message msg, UpdateType type)
         {
             if (msg.Text is not { } text)
-                Console.WriteLine($"Received a message of type {msg.Type}");
+                _logger.LogWarning($"Received a message of type {msg.Type}");
             else if (text.StartsWith('/'))
             {
                 var space = text.IndexOf(' ');
@@ -51,13 +55,14 @@ namespace TelegramBot.Handlers
 
         async Task OnTextMessage(Message msg)
         {
-            Console.WriteLine($"Received text '{msg.Text}' in {msg.Chat}");
+            _logger.LogInformation($"Received text '{msg.Text}' in {msg.Chat}");
             await OnCommand("/start", "", msg); // for now we redirect to command /start
         }
 
         async Task OnCommand(string command, string args, Message msg)
         {
-            Console.WriteLine($"Received command: {command} {args}");
+            _logger.LogInformation($"Received command: {command} {args}");
+
             try
             {
                 var userService = _services.GetRequiredService<UserServices>();
@@ -91,7 +96,7 @@ namespace TelegramBot.Handlers
             catch (Exception ex)
             {
 
-                Console.WriteLine(ex.Message);
+                _logger.LogError(ex.Message);
             }
         }
 
@@ -101,7 +106,7 @@ namespace TelegramBot.Handlers
             {
                 case { CallbackQuery: { } callbackQuery }: await OnCallbackQuery(callbackQuery); break;
                 case { PollAnswer: { } pollAnswer }: await OnPollAnswer(pollAnswer); break;
-                default: Console.WriteLine($"Received unhandled update {update.Type}"); break;
+                default: _logger.LogInformation($"Received unhandled update {update.Type}"); break;
             };
         }
 
