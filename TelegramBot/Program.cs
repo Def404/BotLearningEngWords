@@ -86,9 +86,9 @@ internal class Program
                     }
                 }
 
-                logger.LogInformation($"@{me.Username} is running... Press Escape to terminate");
-                while (Console.ReadKey(true).Key != ConsoleKey.Escape) ;
-                cts.Cancel();
+                logger.LogInformation($"@{me.Username} is running...");
+                
+                while(true);
             }
             catch (Exception ex)
             {
