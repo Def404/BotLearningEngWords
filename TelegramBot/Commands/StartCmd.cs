@@ -1,6 +1,5 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
-using TelegramBot.Commands.Helpers;
 using TelegramBot.Commands.Interfaces;
 using TelegramBot.Services;
 
@@ -32,8 +31,6 @@ namespace TelegramBot.Commands
 
             if (message.Text is null)
                 return;
-
-            var parameters = CommandHelpers.GetParameters(message.Text, this.CommandTag);
 
             var result = await userServices.InitUser(user);
 

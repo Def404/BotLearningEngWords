@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using System.Text.Json;
 using System.Text;
+using System.Text.Json;
 using TelegramBot.Models;
 
 namespace TelegramBot.Services
@@ -89,7 +89,7 @@ namespace TelegramBot.Services
 
             var languageCodeHints = new string[] { "ru", "en" };
 
-            var detectBodyModel = new DetectBodyModel
+            var detectBodyModel = new DetectLangRequest
             {
                 LanguageCodeHints = languageCodeHints,
                 FolderId = FOLDER_ID,
@@ -109,7 +109,7 @@ namespace TelegramBot.Services
 
             var detectJsonResponse = await detectResponse.Content.ReadAsStringAsync();
 
-            var detectResponseModel = JsonSerializer.Deserialize<DetectResponseModel>(detectJsonResponse);
+            var detectResponseModel = JsonSerializer.Deserialize<DetectLangResponse>(detectJsonResponse);
 
             if (detectResponseModel == null)
             {
@@ -128,7 +128,7 @@ namespace TelegramBot.Services
                 return string.Empty;
             }
 
-            var translateBodyModel = new TranslateBodyModel
+            var translateBodyModel = new TranslateRequest
             {
                 FolderId = FOLDER_ID,
                 TargetLanguageCode = targetLanguage,
@@ -147,7 +147,7 @@ namespace TelegramBot.Services
             }
 
             var translateJsonResponse = await translateResponse.Content.ReadAsStringAsync();
-            var translateResponseModel = JsonSerializer.Deserialize<TranslateResponseModel>(translateJsonResponse);
+            var translateResponseModel = JsonSerializer.Deserialize<TranslateResponse>(translateJsonResponse);
 
             if (translateResponseModel == null)
             {

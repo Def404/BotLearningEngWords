@@ -8,10 +8,10 @@ namespace TelegramBot.Models
         public string ModelUri { get; set; } = string.Empty;
 
         [JsonPropertyName("completionOptions")]
-        public CompletionOptions CompletionOptions { get; set; }
+        public CompletionOptions CompletionOptions { get; set; } = new CompletionOptions();
 
         [JsonPropertyName("messages")]
-        public GptMessage[] Messages { get; set; }
+        public GptMessage[] Messages { get; set; } = Array.Empty<GptMessage>();
     }
 
     public class CompletionOptions
@@ -26,12 +26,12 @@ namespace TelegramBot.Models
         public string MaxTokens { get; set; } = string.Empty;
 
         [JsonPropertyName("reasoningOptions")]
-        public ReasoningOptions ReasoningOptions { get; set; }
+        public ReasoningOptions ReasoningOptions { get; set; } = new ReasoningOptions();
     }
 
     public class ReasoningOptions
     {
         [JsonPropertyName("mode")]
-        public string Mode { get; set; }
+        public string Mode { get; set; } = string.Empty;
     }
 }

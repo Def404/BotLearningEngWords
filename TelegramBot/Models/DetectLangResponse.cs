@@ -2,7 +2,7 @@
 
 namespace TelegramBot.Models;
 
-public class DetectResponseModel
+public class DetectLangResponse
 {
     [JsonPropertyName("languageCode")]
     public string LanguageCode { get; set; } = string.Empty;

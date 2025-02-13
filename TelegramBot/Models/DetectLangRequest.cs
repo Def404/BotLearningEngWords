@@ -2,7 +2,7 @@
 
 namespace TelegramBot.Models;
 
-public class DetectBodyModel
+public class DetectLangRequest
 {
     [JsonPropertyName("folderId")]
     public string FolderId {get; set;} = string.Empty;

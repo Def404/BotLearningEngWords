@@ -84,8 +84,6 @@ internal class Program
                     {
                         await Task.WhenAll(users.Select(user => bot.SendMessage(user.telegram_user_id, "Ура! Я готов к работе!")));
                     }
-
-                    //await Task.WhenAll(users.Select(async user => bot.SendMessage(user.telegram_user_id, await yandexApiService.GenerateGtpMassageAsync(""))));
                 }
 
                 logger.LogInformation($"@{me.Username} is running... Press Escape to terminate");

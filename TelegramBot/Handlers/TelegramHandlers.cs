@@ -1,7 +1,5 @@
-﻿using DatabaseClassLibrary.Models;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -88,7 +86,7 @@ namespace TelegramBot.Handlers
                     }
                     else
                     {
-                        await _bot.SendMessage(msg.Chat, "Команда не доступна.\n\nВыполните команду - /start", replyParameters: msg.MessageId);
+                        await _bot.SendMessage(msg.Chat, $"Команда {command} не доступна.\n\nВыполните команду - /start", replyParameters: msg.MessageId);
                     }
                 }
                 else

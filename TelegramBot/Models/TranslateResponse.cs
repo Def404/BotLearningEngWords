@@ -2,7 +2,7 @@
 
 namespace TelegramBot.Models;
 
-public class TranslateResponseModel
+public class TranslateResponse
 {
     [JsonPropertyName("translations")]
     public List<Translation> Translations { get; set; } = new List<Translation>();

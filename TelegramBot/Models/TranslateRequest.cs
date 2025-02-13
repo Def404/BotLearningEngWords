@@ -2,7 +2,7 @@
 
 namespace TelegramBot.Models;
 
-public class TranslateBodyModel
+public class TranslateRequest
 {
     [JsonPropertyName("targetLanguageCode")]
     public string TargetLanguageCode {get; set;} = string.Empty;
