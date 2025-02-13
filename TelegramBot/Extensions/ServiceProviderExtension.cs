@@ -12,6 +12,7 @@ namespace TelegramBot.Extensions
             services.AddSingleton<ICommand, HelloCmd>();
             services.AddSingleton<ICommand, TranslateCmd>();
             services.AddSingleton<ICommand, StartCmd>();
+            services.AddSingleton<ICommand, DeleteUserCmd>();
 
             return services;
         }

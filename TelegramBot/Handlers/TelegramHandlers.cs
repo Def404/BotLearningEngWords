@@ -75,7 +75,7 @@ namespace TelegramBot.Handlers
                     if (await userService.HasUserAsync(tgUser) || command.Equals("/start"))
                     {
                         var commands = _services.GetServices<ICommand>();
-                        var myCommand = commands.FirstOrDefault(i => i.CommandTag.Equals(command));
+                        var myCommand = commands.FirstOrDefault(i => i.CommandTag.ToLower().Equals(command));
                         if (myCommand != null)
                         {
                             await myCommand.Action(_bot, msg);

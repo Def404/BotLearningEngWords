@@ -46,5 +46,17 @@ namespace TelegramBot.Services
         {
             return await _context.users.ToListAsync();
         }
+
+        public async Task<bool> DeleteUserAsync(User tgUser)
+        {
+            var userInDb = await _context.users.FirstOrDefaultAsync(i => i.telegram_user_id == tgUser.Id);
+            if (userInDb != null)
+            {
+                _context.users.Remove(userInDb);
+                var result = await _context.SaveChangesAsync();
+                return result > 0;
+            }
+            return false;
+        }
     }
 }
