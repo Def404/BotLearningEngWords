@@ -13,6 +13,8 @@ internal class Program
     private static async Task Main(string[] args)
     {
         var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING") ?? "";
+        var iamToken = Environment.GetEnvironmentVariable("IAM_TOKEN") ?? "";
+        var folderId = Environment.GetEnvironmentVariable("FOLDER_ID") ?? "";
 
         var serviceProvider = new ServiceCollection()
             .AddLogging(loggingBuilder =>
@@ -25,7 +27,15 @@ internal class Program
                 options.UseNpgsql(connectionString))
             .CommandInit()
             .AddTransient<UserServices>()
+            .AddHttpClient()
+            .AddHttpClient<YandexApiService>(c =>
+            {
+                c.DefaultRequestHeaders.Add("Authorization", $"Api-Key {iamToken}");
+                c.DefaultRequestHeaders.Add("x-folder-id", $"{folderId}");
+            })
+            .Services
             .BuildServiceProvider();
+
 
         using (var scope = serviceProvider.CreateScope())
         {
@@ -50,10 +60,33 @@ internal class Program
                 await bot.DropPendingUpdates();
 
                 TelegramHandlers telegramHandlers = new TelegramHandlers(cts, bot, me, serviceProvider);
-
+               
                 bot.OnError += telegramHandlers.OnError;
                 bot.OnMessage += telegramHandlers.OnMessage;
                 bot.OnUpdate += telegramHandlers.OnUpdate;
+
+                var enableSendStartMessage = bool.Parse(Environment.GetEnvironmentVariable("ENABLE_SEND_START_BOT_MESSAGE") ?? "false");
+
+                if (enableSendStartMessage)
+                {
+                    var userServices = scope.ServiceProvider.GetRequiredService<UserServices>();
+                    var yandexApiService = scope.ServiceProvider.GetRequiredService<YandexApiService>();
+
+                    var users = await userServices.GetAllUsersAsync();
+
+                    var promtStartMessage = Environment.GetEnvironmentVariable("PROMT_START_MESSAGE");
+
+                    if (promtStartMessage != null)
+                    {
+                        await Task.WhenAll(users.Select(async user => bot.SendMessage(user.telegram_user_id, await yandexApiService.GenerateGtpMassageAsync(promtStartMessage))));
+                    }
+                    else
+                    {
+                        await Task.WhenAll(users.Select(user => bot.SendMessage(user.telegram_user_id, "Ура! Я готов к работе!")));
+                    }
+
+                    //await Task.WhenAll(users.Select(async user => bot.SendMessage(user.telegram_user_id, await yandexApiService.GenerateGtpMassageAsync(""))));
+                }
 
                 logger.LogInformation($"@{me.Username} is running... Press Escape to terminate");
                 while (Console.ReadKey(true).Key != ConsoleKey.Escape) ;
@@ -61,7 +94,7 @@ internal class Program
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error app");
+                logger.LogError($"Error app: {ex.Message}");
             }
 
             logger.LogInformation("Stop app");

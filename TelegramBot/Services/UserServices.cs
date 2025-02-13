@@ -41,5 +41,10 @@ namespace TelegramBot.Services
 
             return userInDb != null;
         }
+
+        public async Task<List<user>> GetAllUsersAsync()
+        {
+            return await _context.users.ToListAsync();
+        }
     }
 }
