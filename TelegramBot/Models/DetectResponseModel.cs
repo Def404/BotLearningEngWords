@@ -1,6 +1,9 @@
-﻿namespace TelegramBot.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace TelegramBot.Models;
 
 public class DetectResponseModel
 {
-    public string languageCode { get; set; }
+    [JsonPropertyName("languageCode")]
+    public string LanguageCode { get; set; } = string.Empty;
 }

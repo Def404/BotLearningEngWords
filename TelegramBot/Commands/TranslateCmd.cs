@@ -1,23 +1,20 @@
 ﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TelegramBot.Commands.Helpers;
 using TelegramBot.Commands.Interfaces;
-using TelegramBot.Models;
 using TelegramBot.Services;
 
 namespace TelegramBot.Commands;
 
 public class TranslateCmd : ICommand
 {
-    private readonly ILogger<TranslateCmd> _logger;
+    private readonly YandexApiService _yandexApiService;
 
-    public TranslateCmd(UserServices services, ILogger<TranslateCmd> logger)
+    public TranslateCmd(ILogger<TranslateCmd> logger, YandexApiService yandexApiService)
     {
-        _logger = logger;
+        _yandexApiService = yandexApiService;
     }
 
     public string Name => "Translate";
@@ -28,15 +25,6 @@ public class TranslateCmd : ICommand
 
     public async Task Action(ITelegramBotClient botClient, Message message)
     {
-        var folderId = Environment.GetEnvironmentVariable("FOLDER_ID") ?? "";
-        var iamToken = Environment.GetEnvironmentVariable("IAM_TOKEN") ?? "";
-
-        if (String.IsNullOrEmpty(folderId) || String.IsNullOrEmpty(iamToken))
-        {
-            _logger.LogError("No folder id or iam token provided");
-            return;
-        }
-
         if (message.Text is null)
             return;
 
@@ -55,41 +43,11 @@ public class TranslateCmd : ICommand
             return;
         }
 
-        var client = new HttpClient();
-        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {iamToken}");
-
-        var languageCodeHints = new string[] { "ru", "en" };
-        var detectBodyModel = new DetectBodyModel(folderId, languageCodeHints, parameter);
-
-        var detectBodyJson = JsonConvert.SerializeObject(detectBodyModel);
-
-        var detectContent = new StringContent(detectBodyJson, Encoding.UTF8, "application/json");
-        var detectResponse = await client.PostAsync("https://translate.api.cloud.yandex.net/translate/v2/detect", detectContent);
-
-        if (detectResponse.StatusCode != System.Net.HttpStatusCode.OK)
-        {
-            _logger.LogError($"Detect response status code: {detectResponse.StatusCode}");
-            return;
-        }
-
-        var detectJsonResponse = await detectResponse.Content.ReadAsStringAsync();
-
-        var detectResponseModel = JsonConvert.DeserializeObject<DetectResponseModel>(detectJsonResponse);
-
-        if (detectResponseModel == null)
-        {
-            var errorText = $"Не удалось определить язык введенного текста";
-
-            await botClient.SendMessage(chat.Id, errorText,
-                parseMode: ParseMode.Markdown,
-                protectContent: true);
-
-            return;
-        }
+        var detectLanguage = await _yandexApiService.DetectLanguageAsync(parameter);
 
         var targetLanguageCode = "";
 
-        switch (detectResponseModel.languageCode)
+        switch (detectLanguage)
         {
             case "ru":
                 targetLanguageCode = "en";
@@ -109,23 +67,9 @@ public class TranslateCmd : ICommand
                 }
         }
 
-        var translateBodyModel = new TranslateBodyModel(folderId, targetLanguageCode, parameter);
-        var translateBodyJson = JsonConvert.SerializeObject(translateBodyModel);
-        var translateContent = new StringContent(translateBodyJson, Encoding.UTF8, "application/json");
+        var translateMessage = await _yandexApiService.TranslateAsync(parameter, targetLanguageCode);
 
-        var translateResponse = await client.PostAsync("https://translate.api.cloud.yandex.net/translate/v2/translate", translateContent);
-
-        if (translateResponse.StatusCode != System.Net.HttpStatusCode.OK)
-        {
-            _logger.LogError($"Translate response status code: {translateResponse.StatusCode}");
-            return;
-        }
-
-        var translateJsonResponse = await translateResponse.Content.ReadAsStringAsync();
-
-        var translateResponseModel = JsonConvert.DeserializeObject<TranslateResponseModel>(translateJsonResponse);
-
-        if (translateResponseModel == null)
+        if (string.IsNullOrEmpty(translateMessage))
         {
             var errorText = $"Не удалось перевести текст";
 
@@ -136,7 +80,7 @@ public class TranslateCmd : ICommand
             return;
         }
 
-        await botClient.SendMessage(chat.Id, translateResponseModel.translations.First().text,
+        await botClient.SendMessage(chat.Id, translateMessage,
             replyParameters: message.MessageId);
     }
 }

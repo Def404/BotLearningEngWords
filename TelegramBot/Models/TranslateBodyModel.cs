@@ -1,16 +1,16 @@
-﻿namespace TelegramBot.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace TelegramBot.Models;
 
 public class TranslateBodyModel
 {
-    public string targetLanguageCode {get; set;}
-    public string[] texts {get; set;}
-    public string folderId {get; set;}
-    
-    public TranslateBodyModel(string folderId, string targetLanguageCode, string text)
-    {
-        this.folderId = folderId;
-        this.targetLanguageCode = targetLanguageCode;
-        this.texts = new string[] { text };
-    }
+    [JsonPropertyName("targetLanguageCode")]
+    public string TargetLanguageCode {get; set;} = string.Empty;
+
+    [JsonPropertyName("texts")]
+    public string[] Texts {get; set;} = Array.Empty<string>();
+
+    [JsonPropertyName("folderId")]
+    public string FolderId { get; set; } = string.Empty;
 
 }

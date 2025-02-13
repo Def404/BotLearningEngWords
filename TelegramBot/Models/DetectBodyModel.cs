@@ -1,15 +1,15 @@
-﻿namespace TelegramBot.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace TelegramBot.Models;
 
 public class DetectBodyModel
 {
-    public string folderId {get; set;}
-    public string[] languageCodeHints {get; set;}
-    public string text {get; set;}
+    [JsonPropertyName("folderId")]
+    public string FolderId {get; set;} = string.Empty;
 
-    public DetectBodyModel(string folderId, string[] languageCodeHints, string text)
-    {
-        this.folderId = folderId;
-        this.languageCodeHints = languageCodeHints;
-        this.text = text;
-    }
+    [JsonPropertyName("languageCodeHints")]
+    public string[] LanguageCodeHints {get; set;} = Array.Empty<string>();
+
+    [JsonPropertyName("text")]
+    public string Text { get; set; } = string.Empty;
 }

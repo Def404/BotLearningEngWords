@@ -1,12 +1,19 @@
-﻿namespace TelegramBot.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace TelegramBot.Models;
 
 public class TranslateResponseModel
 {
-    public List<Translation> translations { get; set; }
+    [JsonPropertyName("translations")]
+    public List<Translation> Translations { get; set; } = new List<Translation>();
 
     public class Translation
     {
-        public string text { get; set; }
-        public string detectedLanguageCode { get; set; }
+        [JsonPropertyName("text")]
+        public string Text { get; set; } = string.Empty;
+
+        [JsonPropertyName("detectedLanguageCode")]
+        public string DetectedLanguageCode { get; set; } = string.Empty;
     }
+
 }
