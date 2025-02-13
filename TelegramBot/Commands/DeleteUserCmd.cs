@@ -5,19 +5,19 @@ using TelegramBot.Services;
 
 namespace TelegramBot.Commands
 {
-    public class StartCmd : ICommand
+    public class DeleteUserCmd : ICommand
     {
         private readonly UserServices userServices;
 
-        public StartCmd(UserServices services)
+        public DeleteUserCmd(UserServices services)
         {
             userServices = services;
         }
 
-        public string Name => "Start";
-        public string Description => "Начальная команда";
-        public string CommandTag => "/start";
-        public string CommandInfo => "/start";
+        public string Name => "DeleteUser";
+        public string Description => "Команда удаления пользователя";
+        public string CommandTag => "/deleteUser";
+        public string CommandInfo => "/deleteUser";
         public int ParameterCount => 0;
 
         public async Task Action(ITelegramBotClient botClient, Message message)
@@ -32,15 +32,15 @@ namespace TelegramBot.Commands
             if (message.Text is null)
                 return;
 
-            var result = await userServices.InitUser(user);
+            var result = await userServices.DeleteUserAsync(user);
 
             if (result)
             {
-                await botClient.SendMessage(chat.Id, $"Вы успешно зарегистрировались в системе!");
+                await botClient.SendMessage(chat.Id, $"Вы успешно удалены из системы!");
             }
             else
             {
-                await botClient.SendMessage(chat.Id, $"Вы уже зарегистрированы в системе!");
+                await botClient.SendMessage(chat.Id, $"Вы не зарегистрированы в системе!");
             }
 
         }

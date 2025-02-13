@@ -3,7 +3,6 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-using TelegramBot.Commands.Helpers;
 using TelegramBot.Commands.Interfaces;
 
 namespace TelegramBot.Commands;
@@ -29,8 +28,6 @@ public class HelpCmd : ICommand
             return;
 
         var chat = message.Chat;
-
-        var parameters = CommandHelpers.GetParameters(message.Text, this.CommandTag);
 
         var newText = """
             <b>Информация</b>

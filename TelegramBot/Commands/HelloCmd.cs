@@ -1,7 +1,5 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using TelegramBot.Commands.Helpers;
 using TelegramBot.Commands.Interfaces;
 
 namespace TelegramBot.Commands;
@@ -25,8 +23,6 @@ public class HelloCmd : ICommand
 
         if (message.Text is null)
             return;
-
-        var parameters = CommandHelpers.GetParameters(message.Text, this.CommandTag);
 
         await botClient.SendMessage(chat.Id, $"Привет, {user.FirstName}!",
             replyParameters: message.MessageId);
