@@ -1,6 +1,7 @@
 .vs
 .idea
 .env
+.vscode
 
 TelegramBot/.idea
 TelegramBot/.vs
