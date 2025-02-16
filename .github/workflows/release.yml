@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  pull_request:
+    branches: [ "master" ]
+    types: [closed]
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Extract tag from PR title
+        id: extract_tag
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          if [[ "$PR_TITLE" =~ ^chore\(release\):\ ([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            TAG="v${BASH_REMATCH[1]}"
+            echo "TAG=$TAG" >> $GITHUB_ENV
+            echo "::set-output name=tag::$TAG"
+          else
+            echo "PR title does not match release format. Skipping tag creation."
+            echo "::set-output name=tag::"
+
+      - name: Create GitHub Release
+        if: steps.extract_tag.outputs.tag != ''
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.extract_tag.outputs.tag }}
+          release_name: ${{ steps.extract_tag.outputs.tag }}
+          body: ${{ github.event.pull_request.body }}
+          draft: false
+          prerelease: false
