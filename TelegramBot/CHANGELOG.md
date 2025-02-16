@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="2.2.0"></a>
+## [2.2.0](https://www.github.com/Def404/BotLearningEngWords/releases/tag/v2.2.0) (2025-02-16)
+
+### Features
+
+* **bot:** Added new config files under TelegramBot.Options ([5f1b41f](https://www.github.com/Def404/BotLearningEngWords/commit/5f1b41fdb577c9fe70b224ee026b707ad5365759))
+
 <a name="2.1.0"></a>
 ## [2.1.0](https://www.github.com/Def404/BotLearningEngWords/releases/tag/v2.1.0) (2025-02-13)
 
