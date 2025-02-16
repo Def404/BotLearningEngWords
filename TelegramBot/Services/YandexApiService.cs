@@ -1,27 +1,28 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json;
 using TelegramBot.Models;
+using TelegramBot.Options;
 
 namespace TelegramBot.Services
 {
     public class YandexApiService
     {
-        private readonly string FOLDER_ID = Environment.GetEnvironmentVariable("FOLDER_ID") ?? "";
-        private readonly string IAM_TOKEN = Environment.GetEnvironmentVariable("IAM_TOKEN") ?? "";
-
         private readonly ILogger<YandexApiService> _logger;
         private readonly HttpClient _httpClient;
+        private readonly YandexConfig _yandexConfig;
 
-        public YandexApiService(ILogger<YandexApiService> logger, HttpClient httpClient)
+        public YandexApiService(ILogger<YandexApiService> logger, HttpClient httpClient, IOptions<YandexConfig> yandexConfig)
         {
             _logger = logger;
             _httpClient = httpClient;
+            _yandexConfig = yandexConfig.Value;
         }
 
-        public async Task<string> GenerateGtpMassageAsync(string promt)
+        public async Task<string> GenerateGtpMassageAsync(string prompt)
         {
-            if (string.IsNullOrEmpty(FOLDER_ID) || string.IsNullOrEmpty(IAM_TOKEN))
+            if (string.IsNullOrEmpty(_yandexConfig.FolderId) || string.IsNullOrEmpty(_yandexConfig.ApiToken))
             {
                 _logger.LogError("No folder id or iam token provided");
                 return string.Empty;
@@ -29,7 +30,7 @@ namespace TelegramBot.Services
 
             var requestModel = new GptRequest
             {
-                ModelUri = $"gpt://{FOLDER_ID}/yandexgpt",
+                ModelUri = $"gpt://{_yandexConfig.FolderId}/yandexgpt",
                 CompletionOptions = new CompletionOptions
                 {
                     Stream = false,
@@ -45,7 +46,7 @@ namespace TelegramBot.Services
                     new GptMessage
                     {
                         Role = "system",
-                        Text = promt,
+                        Text = prompt,
                     },
                     /*new GptMessage
                     {
@@ -81,7 +82,7 @@ namespace TelegramBot.Services
 
         public async Task<string> DetectLanguageAsync(string text)
         {
-            if (string.IsNullOrEmpty(FOLDER_ID) || string.IsNullOrEmpty(IAM_TOKEN))
+            if (string.IsNullOrEmpty(_yandexConfig.FolderId) || string.IsNullOrEmpty(_yandexConfig.ApiToken))
             {
                 _logger.LogError("No folder id or iam token provided");
                 return string.Empty;
@@ -92,7 +93,7 @@ namespace TelegramBot.Services
             var detectBodyModel = new DetectLangRequest
             {
                 LanguageCodeHints = languageCodeHints,
-                FolderId = FOLDER_ID,
+                FolderId = _yandexConfig.FolderId,
                 Text = text
             };
 
@@ -122,7 +123,7 @@ namespace TelegramBot.Services
 
         public async Task<string> TranslateAsync(string text, string targetLanguage)
         {
-            if (string.IsNullOrEmpty(FOLDER_ID) || string.IsNullOrEmpty(IAM_TOKEN))
+            if (string.IsNullOrEmpty(_yandexConfig.FolderId) || string.IsNullOrEmpty(_yandexConfig.ApiToken))
             {
                 _logger.LogError("No folder id or iam token provided");
                 return string.Empty;
@@ -130,7 +131,7 @@ namespace TelegramBot.Services
 
             var translateBodyModel = new TranslateRequest
             {
-                FolderId = FOLDER_ID,
+                FolderId = _yandexConfig.FolderId,
                 TargetLanguageCode = targetLanguage,
                 Texts = new string[] { text }
             };
